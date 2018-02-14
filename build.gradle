@@ -1,6 +1,6 @@
 buildscript {
-    ext.corda_release_group = 'net.corda'
-    ext.corda_release_version = '2.0.0'
+    ext.corda_release_group = 'com.r3.corda'
+    ext.corda_release_version = 'R3.CORDA-3.0.0-DEV-PREVIEW'
     ext.corda_gradle_plugins_version = '1.0.0'
     ext.kotlin_version = '1.1.4'
     ext.junit_version = '4.12'
@@ -46,15 +46,15 @@ sourceSets {
         kotlin {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
-            srcDir file('src/integration-test/kotlin')
+            srcDir file('src/integrationTest/kotlin')
         }
     }
 }
 
-configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
+//configurations {
+//    integrationTestCompile.extendsFrom testCompile
+//    integrationTestRuntime.extendsFrom testRuntime
+//}
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
@@ -74,11 +74,8 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    // Specify your CorDapp's dependencies below, including dependent CorDapps.
-    // We've defined Cash as a dependent CorDapp as an example.
-    cordapp project(":cordapp")
-    cordapp project(":cordapp-contracts-states")
-    cordapp "$corda_release_group:corda-finance:$corda_release_version"
+    // I'm not using the Corda finance module as I'm re-writing it!
+    // cordapp "$corda_release_group:corda-finance:$corda_release_version"
 }
 
 task integrationTest(type: Test, dependsOn: []) {
@@ -103,11 +100,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         advertisedServices = ["corda.notary.validating"]
         p2pPort 10002
         rpcPort 10003
-        cordapps = [
-                "$project.group:cordapp-contracts-states:$project.version",
-                "$project.group:cordapp:$project.version",
-                "$corda_release_group:corda-finance:$corda_release_version"
-        ]
+        cordapps = []
     }
     node {
         name "O=PartyA,L=London,C=GB"
@@ -115,11 +108,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         p2pPort 10005
         rpcPort 10006
         webPort 10007
-        cordapps = [
-                "$project.group:cordapp-contracts-states:$project.version",
-                "$project.group:cordapp:$project.version",
-                "$corda_release_group:corda-finance:$corda_release_version"
-        ]
+        cordapps = []
         rpcUsers = [[ user: "user1", "password": "test", "permissions": []]]
     }
     node {
@@ -128,17 +117,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         p2pPort 10008
         rpcPort 10009
         webPort 10010
-        cordapps = [
-                "$project.group:cordapp-contracts-states:$project.version",
-                "$project.group:cordapp:$project.version",
-                "$corda_release_group:corda-finance:$corda_release_version"
-        ]
+        cordapps = []
         rpcUsers = [[ user: "user1", "password": "test", "permissions": []]]
     }
-}
-
-task runTemplateClient(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.ClientKt'
-    args 'localhost:10006'
 }

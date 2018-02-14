@@ -1,2 +1,3 @@
-include 'cordapp'
-include 'cordapp-contracts-states'
+include 'issuer'
+include 'mock-bank'
+

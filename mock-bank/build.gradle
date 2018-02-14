@@ -1,3 +1,9 @@
+group 'com.r3.cc'
+version '0.1'
+
+group 'com.r3.cc'
+version '0.1'
+
 repositories {
     mavenLocal()
     jcenter()
@@ -25,7 +31,7 @@ sourceSets {
         kotlin {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
-            srcDir file('src/integration-test/kotlin')
+            srcDir file('src/integrationTest/kotlin')
         }
     }
 }
@@ -53,9 +59,7 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    // Specify your CorDapp's dependencies below, including dependent CorDapps.
-    // We've defined Cash as a dependent CorDapp as an example.
-    cordapp project(":cordapp-contracts-states")
+    compile "org.jarling:jarling:0.1.0" // Client for the Starling Bank API.
 }
 
 task integrationTest(type: Test, dependsOn: []) {
