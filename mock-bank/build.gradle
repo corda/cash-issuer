@@ -1,9 +1,6 @@
 group 'com.r3.cash'
 version '0.1'
 
-group 'com.r3.cash'
-version '0.1'
-
 repositories {
     mavenLocal()
     jcenter()

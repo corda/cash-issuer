@@ -1,4 +1,4 @@
-package com.r3.cc
+package com.r3.cash.apiclient
 
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.internal.openHttpConnection
