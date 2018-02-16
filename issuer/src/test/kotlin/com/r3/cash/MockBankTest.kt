@@ -1,53 +1,45 @@
 package com.r3.cash
 
+import com.r3.cash.issuer.services.IssuerService
 import com.r3.cash.monzo.MockMonzoApi
 import com.r3.cash.monzo.MockMonzoBankAccount
 import com.r3.cash.monzo.ProductionMonzoApi
 import com.typesafe.config.ConfigFactory
+import net.corda.core.node.services.queryBy
+import net.corda.finance.GBP
+import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.contracts.getCashBalance
+import net.corda.node.internal.StartedNode
+import net.corda.testing.node.MockNetwork
+import org.junit.Before
 import org.junit.Test
 
-class MockBankTest {
+class MockBankTest : MockNetworkTest(numberOfNodes = 2) {
 
-//    private val mockApi = MockMonzoApi()
+    lateinit var A: StartedNode<MockNetwork.MockNode>
+    lateinit var B: StartedNode<MockNetwork.MockNode>
+    lateinit var ISSUER: StartedNode<MockNetwork.MockNode>
 
-//    @Before
-//    fun setup() {
-//        mockApi.simulate()
-//    }
-
-//    @Test
-//    fun test() {
-//        val accountNumber = mockApi.accounts().accounts.single().account_number
-//        println("Generate transactions for ten seconds...")
-//        Thread.sleep(10000)
-//        val transactions = mockApi.transactions(accountNumber)
-//        println("First: " + transactions.transactions.first().id)
-//        println("Last: " + transactions.transactions.last().id)
-//        println("Getting the transaction id of the last transaction generated.")
-//        val lastTxId = mockApi.transactions(accountNumber).transactions.last().id
-//        println("Last transaction id: $lastTxId")
-//        println("Generate transactions for five more seconds...")
-//        Thread.sleep(5000)
-//        val transactionsSince = mockApi.transactions(accountNumber, lastTxId).transactions
-//        println("Print the transaction since transaction with id: $lastTxId")
-//        println(transactionsSince)
-//        println(mockApi.balance(accountNumber))
-//    }
+    @Before
+    override fun initialiseNodes() {
+        A = nodes[0]
+        B = nodes[1]
+        ISSUER = nodes[2]
+    }
 
     @Test
     fun `create a mock Monzo API, add an account and generate some transactions for 60 seconds then call the API`() {
         val mockMonzoApi = MockMonzoApi()
-        mockMonzoApi.bank.addAccount("Roger", "12345678")
+        mockMonzoApi.bank.openAccount("Roger", "12345678")
         val account = mockMonzoApi.bank.accounts.single() as MockMonzoBankAccount
-        val subscriber = account.startGeneratingTransactions()
+        account.startGeneratingTransactions()
         Thread.sleep(20000)
-        subscriber.unsubscribe()
         println(mockMonzoApi.transactions(account.id))
         println(mockMonzoApi.balance(account.id))
     }
 
     @Test
-    fun `get transactions from the prduction monzo API`() {
+    fun `get transactions from the production monzo API`() {
         val config = ConfigFactory.parseResources("issuer.conf")
         val monzoAccessToken = config.getString("monzoAccessToken")
         val monzoApi = ProductionMonzoApi(monzoAccessToken, "https://api.monzo.com")
@@ -55,6 +47,51 @@ class MockBankTest {
         println(monzoApi.balance(accountId = "acc_00009RE1DzwEupfetgm84f"))
         println(monzoApi.transactions(accountId = "acc_00009RE1DzwEupfetgm84f"))
         println(monzoApi.transactions(accountId = "acc_00009RE1DzwEupfetgm84f", since = "tx_00009RJHGnGd3LgsDVCmmn"))
+    }
+
+    @Test
+    fun test() {
+        // Set up mock bank and api.
+        val bank = banks.single()
+        val mockMonzoApi = MockMonzoApi(bank)
+
+        // Inject the api.
+        val issuerService = ISSUER.services.cordaService(IssuerService::class.java)
+        issuerService.injectApi(mockMonzoApi)
+        issuerService.startPolling()
+        ISSUER.smm.changes.subscribe {
+            println(it)
+        }
+
+        network.waitQuiescent()
+
+        println(A.services.getCashBalance(GBP))
+        A.services.vaultService.queryBy<Cash.State>().states.forEach { cashState ->
+            println(cashState.state.data)
+        }
+    }
+
+    @Test
+    fun realTest() {
+        // Set up mock bank and api.
+        val config = ConfigFactory.parseResources("issuer.conf")
+        val monzoAccessToken = config.getString("monzoAccessToken")
+        val monzoApi = ProductionMonzoApi(monzoAccessToken, "https://api.monzo.com")
+
+        // Inject the api.
+        val issuerService = ISSUER.services.cordaService(IssuerService::class.java)
+        issuerService.injectApi(monzoApi)
+        issuerService.startPolling()
+        ISSUER.smm.changes.subscribe {
+            println(it)
+        }
+
+        network.waitQuiescent()
+
+        println(A.services.getCashBalance(GBP))
+        A.services.vaultService.queryBy<Cash.State>().states.forEach { cashState ->
+            println(cashState.state.data)
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.r3.cash
 import com.r3.cash.mockbank.Counterparty
 import com.r3.cash.mockbank.MockTransaction
 import rx.Observable
+import rx.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.streams.toList
@@ -70,7 +71,11 @@ val counterparties = listOf(
 // TODO: Mess around with publishOn() / subscribeOn() to see which schedulers perform the best.
 class MockTransactionGenerator(txGenerator: () -> MockTransaction, gapGenerator: () -> Long = randomDelayGenerator()) {
 
-    private val transactionStream = Observable.fromCallable { txGenerator() }.delay { Observable.timer(gapGenerator(), TimeUnit.SECONDS) }.repeat()
+    private val transactionStream = Observable
+            .fromCallable { txGenerator() }
+            .subscribeOn(Schedulers.io())
+            .delay { Observable.timer(gapGenerator(), TimeUnit.SECONDS) }
+            .repeat()
 
     fun start(amount: Int = 0): Observable<MockTransaction> {
         return if (amount == 0) {

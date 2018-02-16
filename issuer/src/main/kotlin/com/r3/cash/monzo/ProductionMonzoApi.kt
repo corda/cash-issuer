@@ -1,10 +1,10 @@
 package com.r3.cash.monzo
 
+import com.r3.cash.apiclient.ApiClient
 import com.r3.cash.monzo.models.Accounts
 import com.r3.cash.monzo.models.Balance
 import com.r3.cash.monzo.models.Transaction
 import com.r3.cash.monzo.models.Transactions
-import com.r3.cc.ApiClient
 
 class ProductionMonzoApi(accessToken: String, url: String) : ApiClient(accessToken, url), MonzoApi {
 

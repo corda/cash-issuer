@@ -2,7 +2,6 @@ package com.r3.cash.mockbank
 
 import com.r3.cash.MockTransactionGenerator
 import net.corda.finance.GBP
-import rx.Subscription
 import java.time.Instant
 import java.util.*
 
@@ -31,7 +30,7 @@ abstract class AbstractMockBankAccount(
 
     abstract fun recordTransaction(amount: Long, counterparty: Counterparty, direction: Direction, description: String)
     abstract fun generateIncomingTransaction(): () -> MockTransaction
-    abstract fun startGeneratingTransactions(amount: Int = 0): Subscription
+    abstract fun startGeneratingTransactions(amount: Int = 0)
 
     fun recordTransaction(transaction: MockTransaction) = _transactions.add(transaction)
 

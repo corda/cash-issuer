@@ -9,7 +9,6 @@ import com.r3.cash.mockbank.Direction
 import com.r3.cash.mockbank.MockTransaction
 import com.r3.cash.randomAmountGenerator
 import net.corda.core.internal.randomOrNull
-import rx.Subscription
 import java.time.Instant
 import java.util.*
 
@@ -53,10 +52,7 @@ class MockMonzoBankAccount(
         }
     }
 
-    override fun startGeneratingTransactions(amount: Int): Subscription {
-        return mockTransactionGenerator.start(amount).subscribe {
-            println(it)
-            recordTransaction(it)
-        }
+    override fun startGeneratingTransactions(amount: Int) {
+        mockTransactionGenerator.start(amount).subscribe { recordTransaction(it) }
     }
 }

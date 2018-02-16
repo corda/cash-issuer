@@ -7,7 +7,7 @@ interface MockBank {
     val sortCodes: Collection<String>
     val accounts: Collection<MockBankAccount>
 
-    fun addAccount(name: String, accountNumber: String): MockBank
-    fun addAccount(id: String, accountNumber: String, sortCode: String, name: String, currency: Currency = GBP): MockBank
+    fun openAccount(name: String, accountNumber: String): MockBankAccount
+    fun openAccount(id: String, accountNumber: String, sortCode: String, name: String, currency: Currency = GBP): MockBankAccount
     fun account(id: String): MockBankAccount?
 }

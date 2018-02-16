@@ -1,11 +1,12 @@
 package com.r3.cash.monzo
 
+import com.r3.cash.apiclient.BankApi
 import com.r3.cash.monzo.models.Accounts
 import com.r3.cash.monzo.models.Balance
 import com.r3.cash.monzo.models.Transaction
 import com.r3.cash.monzo.models.Transactions
 
-interface MonzoApi {
+interface MonzoApi : BankApi {
 
     /**
      * Returns a list of all accounts.

@@ -13,14 +13,14 @@ class MockMonzoBank : MockBank {
 
     private val _accounts: MutableSet<MockBankAccount> = mutableSetOf()
 
-    override fun addAccount(id: String, accountNumber: String, sortCode: String, name: String, currency: Currency): MockBank {
+    override fun openAccount(id: String, accountNumber: String, sortCode: String, name: String, currency: Currency): MockBankAccount {
         val newAccount = MockMonzoBankAccount(id, accountNumber, sortCode, name, currency)
         _accounts.add(newAccount)
-        return this
+        return newAccount
     }
 
-    override fun addAccount(name: String, accountNumber: String): MockBank {
-        return addAccount("acc_00009${generateRandomString(16)}", accountNumber, sortCodes.randomOrNull()!!, name)
+    override fun openAccount(name: String, accountNumber: String): MockBankAccount {
+        return openAccount("acc_00009${generateRandomString(16)}", accountNumber, sortCodes.randomOrNull()!!, name)
     }
 
     override fun account(id: String): MockBankAccount? {
