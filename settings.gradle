@@ -1,3 +1,6 @@
 include 'issuer'
-include 'mock-bank'
+include 'issuer-node'
+include 'issuer-client'
+include 'issuer-daemon'
+include 'issuer-base'
 

@@ -1,24 +1,5 @@
-buildscript {
-    ext.corda_release_group = 'com.r3.corda'
-    ext.corda_release_version = 'R3.CORDA-3.0.0-DEV-PREVIEW-2'
-    ext.corda_gradle_plugins_version = '3.0.4-DP'
-    ext.kotlin_version = '1.1.60'
-    ext.junit_version = '4.12'
-    ext.quasar_version = '0.7.9'
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
-        classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
-        classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
-    }
-}
+group 'com.r3.cash'
+version '0.1'
 
 repositories {
     mavenLocal()
@@ -53,10 +34,10 @@ sourceSets {
     }
 }
 
-//configurations {
-//    integrationTestCompile.extendsFrom testCompile
-//    integrationTestRuntime.extendsFrom testRuntime
-//}
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
@@ -76,12 +57,7 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    // I'm not using the Corda finance module as I'm re-writing it!
-    // cordapp "$corda_release_group:corda-finance:$corda_release_version"
-    cordapp project("issuer-base")
-    cordapp project("issuer-node")
-    cordapp project("issuer-daemon")
-    cordapp project("issuer-client")
+    compile "org.jarling:jarling:0.1.0" // Client for the Starling Bank API.
 }
 
 task integrationTest(type: Test, dependsOn: []) {
@@ -95,31 +71,5 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         apiVersion = "1.1"
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
-    }
-}
-
-task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
-    directory "./build/nodes"
-    node {
-        name "O=Notary,L=London,C=GB"
-        notary = [validating : true]
-        p2pPort 10002
-        cordapps = []
-    }
-    node {
-        name "O=Issuer,L=London,C=GB"
-        p2pPort 10005
-        rpcPort 10006
-        cordapps = ["$project.group:issuer-base:$project.version",
-                    "$project.group:issuer-node:$project.version"]
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
-    }
-    node {
-        name "O=PartyA,L=New York,C=US"
-        p2pPort 10008
-        rpcPort 10009
-        cordapps = ["$project.group:issuer-base:$project.version",
-                    "$project.group:issuer-client:$project.version"]
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
 }
