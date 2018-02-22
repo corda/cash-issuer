@@ -1,4 +1,4 @@
-group 'com.r3.cash'
+group 'com.r3.bn'
 version '0.1'
 
 repositories {
@@ -57,7 +57,7 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    cordapp project(":issuer-common")
+    cordapp project(":bn-common")
 }
 
 task integrationTest(type: Test, dependsOn: []) {

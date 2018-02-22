@@ -57,7 +57,9 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    cordapp project(":issuer-base")
+    cordapp project(":bn-common")
+    cordapp project(":bn-operator")
+    cordapp project(":issuer-common")
 }
 
 task integrationTest(type: Test, dependsOn: []) {

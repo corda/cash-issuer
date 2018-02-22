@@ -57,7 +57,6 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    compile "org.jarling:jarling:0.1.0" // Client for the Starling Bank API.
 }
 
 task integrationTest(type: Test, dependsOn: []) {

@@ -1,4 +1,4 @@
-group 'com.r3.cash'
+group 'com.r3.bn'
 version '0.1'
 
 repositories {
