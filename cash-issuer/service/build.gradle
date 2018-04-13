@@ -1,30 +1,12 @@
-buildscript {
-    ext.corda_release_group = 'com.r3.corda'
-    ext.corda_release_version = 'R3.CORDA-3.0.0-DEV-PREVIEW-3'
-    ext.corda_gradle_plugins_version = '3.1.0'
-    ext.kotlin_version = '1.2.20'
-    ext.junit_version = '4.12'
-    ext.quasar_version = '0.7.9'
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
-        classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
-        classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
-    }
-}
+group 'com.r3.corda.finance.cash.issuer.service'
+version '0.1'
 
 repositories {
     mavenLocal()
     jcenter()
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/'}
     maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
 }
 
@@ -74,9 +56,7 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
-    // Specify your CorDapp's dependencies below, including dependent CorDapps.
-    // We've defined Cash as a dependent CorDapp as an example.
-    //cordapp "$corda_release_group:corda-finance:$corda_release_version"
+    cordapp project(":cash-issuer:common")
 }
 
 task integrationTest(type: Test, dependsOn: []) {
@@ -90,37 +70,5 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         apiVersion = "1.2"
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
-    }
-}
-
-task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
-    directory "./build/nodes"
-    node {
-        name "O=Notary,L=London,C=GB"
-        notary = [validating : true]
-        p2pPort 10002
-        cordapps = []
-    }
-    node {
-        name "O=PartyA,L=London,C=GB"
-        p2pPort 10005
-        rpcSettings {
-            address("localhost:10006")
-            adminAddress("localhost:10046")
-        }
-        webPort 10007
-        cordapps = []
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
-    }
-    node {
-        name "O=PartyB,L=New York,C=US"
-        p2pPort 10008
-        rpcSettings {
-            address("localhost:10009")
-            adminAddress("localhost:10049")
-        }
-        webPort 10010
-        cordapps = []
-        rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
 }
