@@ -1,4 +1,4 @@
-package com.r3.corda.finance.cash.issuer.service.schemas
+package com.r3.corda.finance.cash.issuer.common.schemas
 
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
@@ -15,10 +15,12 @@ object NostroTransactionStateSchemaV1 : MappedSchema(
 ) {
 
     @Entity
-    @Table(name = "bank_accounts")
+    @Table(name = "nostro_transactions")
     class PersistentNostroTransactionState(
             @Column(name = "id")
             var transactionId: String,
+            @Column(name = "account_id")
+            var accountId: String,
             @Column(name = "amount")
             var amount: Long,
             @Column(name = "currency")
@@ -40,6 +42,7 @@ object NostroTransactionStateSchemaV1 : MappedSchema(
     ) : PersistentState() {
         // Default constructor required by hibernate.
         constructor() : this(
+                accountId = "",
                 transactionId = "",
                 amount = 0L,
                 currency = "",

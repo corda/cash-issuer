@@ -1,7 +1,6 @@
-package com.r3.corda.finance.cash.issuer.service.types
+package com.r3.corda.finance.cash.issuer.common.types
 
-import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
-import com.r3.corda.finance.cash.issuer.service.states.NostroTransactionState
+import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
@@ -16,7 +15,6 @@ data class NostroTransaction(
         val currency: Currency,
         val type: String,
         val description: String,
-        val bank: String,
         val createdAt: Instant,
         val source: AccountNumber,
         val destination: AccountNumber
@@ -24,6 +22,7 @@ data class NostroTransaction(
 
 fun NostroTransaction.toState(issuer: Party): NostroTransactionState {
     return NostroTransactionState(
+            accountId = accountId,
             issuer = issuer,
             transactionId = transactionId,
             amountTransfer = AmountTransfer(

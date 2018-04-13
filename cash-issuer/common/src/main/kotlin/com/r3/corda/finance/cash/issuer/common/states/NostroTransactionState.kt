@@ -1,9 +1,9 @@
-package com.r3.corda.finance.cash.issuer.service.states
+package com.r3.corda.finance.cash.issuer.common.states
 
+import com.r3.corda.finance.cash.issuer.common.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
-import com.r3.corda.finance.cash.issuer.service.schemas.NostroTransactionStateSchemaV1
-import com.r3.corda.finance.cash.issuer.service.types.NostroTransactionStatus
-import com.r3.corda.finance.cash.issuer.service.types.NostroTransactionType
+import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
+import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
@@ -16,6 +16,7 @@ import java.time.Instant
 import java.util.*
 
 data class NostroTransactionState(
+        val accountId: String,
         val amountTransfer: AmountTransfer<Currency, AccountNumber>,
         val description: String,
         val createdAt: Instant,
@@ -27,12 +28,13 @@ data class NostroTransactionState(
 ) : LinearState, QueryableState {
 
     constructor(
+            accountId: String,
             issuer: Party,
             transactionId: String,
             amountTransfer: AmountTransfer<Currency, AccountNumber>,
             description: String,
             createdAt: Instant
-    ) : this(amountTransfer, description, createdAt, listOf(issuer), UniqueIdentifier(transactionId))
+    ) : this(accountId, amountTransfer, description, createdAt, listOf(issuer), UniqueIdentifier(transactionId))
 
     fun updateStatus(newStatus: NostroTransactionStatus): NostroTransactionState = copy(status = newStatus)
     fun updateType(newType: NostroTransactionType): NostroTransactionState = copy(type = newType)
@@ -40,6 +42,7 @@ data class NostroTransactionState(
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is NostroTransactionStateSchemaV1 -> NostroTransactionStateSchemaV1.PersistentNostroTransactionState(
+                    accountId = accountId,
                     transactionId = linearId.externalId ?: throw IllegalStateException("This should never be null."),
                     amount = amountTransfer.quantityDelta,
                     currency = amountTransfer.token.currencyCode,

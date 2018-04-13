@@ -56,6 +56,11 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
+    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
+    compile "com.squareup.retrofit2:converter-jackson:$retrofit_version"
+    cordapp project(":cash-issuer:common")
+    cordapp project(":cash-issuer:service") // TODO: Move shared flow definitions into another module.
 }
 
 task integrationTest(type: Test, dependsOn: []) {
