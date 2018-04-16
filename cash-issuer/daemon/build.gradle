@@ -56,6 +56,8 @@ dependencies {
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
+    // JOpt: for command line flags.
+    compile "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
     compile "com.squareup.retrofit2:retrofit:$retrofit_version"
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
     compile "com.squareup.retrofit2:converter-jackson:$retrofit_version"

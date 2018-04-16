@@ -1,4 +1,4 @@
-group 'com.r3.corda.finance.cash.issuer.client'
+group 'com.r3.corda.finance.cash.issuer'
 version '0.1'
 
 repositories {

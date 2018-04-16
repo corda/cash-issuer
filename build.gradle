@@ -1,11 +1,13 @@
 buildscript {
     ext.corda_release_group = 'com.r3.corda'
     ext.corda_release_version = 'R3.CORDA-3.0.0-DEV-PREVIEW-3'
-    ext.corda_gradle_plugins_version = '3.1.0'
+    ext.corda_gradle_plugins_version = '4.0.11'
     ext.kotlin_version = '1.2.20'
     ext.junit_version = '4.12'
-    ext.quasar_version = '0.7.9'
+    ext.quasar_group = 'com.github.corda.quasar'
+    ext.quasar_version = '7629695563deae6cc95adcfbebcbc8322fd0241a'
     ext.retrofit_version = '2.4.0'
+    ext.jopt_simple_version = '5.0.2'
 
     repositories {
         mavenLocal()
@@ -78,6 +80,9 @@ dependencies {
     // Specify your CorDapp's dependencies below, including dependent CorDapps.
     // We've defined Cash as a dependent CorDapp as an example.
     //cordapp "$corda_release_group:corda-finance:$corda_release_version"
+    cordapp project(":cash-issuer:common")
+    cordapp project(":cash-issuer:client")
+    cordapp project(":cash-issuer:service")
 }
 
 task integrationTest(type: Test, dependsOn: []) {
@@ -98,30 +103,30 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     directory "./build/nodes"
     node {
         name "O=Notary,L=London,C=GB"
-        notary = [validating : true]
+        notary = [validating : false]
         p2pPort 10002
         cordapps = []
     }
     node {
-        name "O=PartyA,L=London,C=GB"
+        name "O=Issuer,L=London,C=GB"
         p2pPort 10005
         rpcSettings {
             address("localhost:10006")
             adminAddress("localhost:10046")
         }
-        webPort 10007
-        cordapps = []
+        cordapp project(":cash-issuer:common")
+        cordapp project(":cash-issuer:service")
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
     node {
-        name "O=PartyB,L=New York,C=US"
+        name "O=PartyA,L=New York,C=US"
         p2pPort 10008
         rpcSettings {
             address("localhost:10009")
             adminAddress("localhost:10049")
         }
-        webPort 10010
-        cordapps = []
+        cordapp project(":cash-issuer:common")
+        cordapp project(":cash-issuer:client")
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
 }

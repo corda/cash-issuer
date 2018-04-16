@@ -25,6 +25,8 @@ object BankAccountStateSchemaV1 : MappedSchema(
             var accountNumber: String,
             @Column(name = "currency")
             var currency: String,
+            @Column(name = "type")
+            var type: String,
             @Column(name = "verified")
             var verified: Boolean,
             @Column(name = "last_updated")
@@ -40,6 +42,7 @@ object BankAccountStateSchemaV1 : MappedSchema(
                 accountName = "",
                 accountNumber = "",
                 currency = "",
+                type = "",
                 verified = false,
                 lastUpdated = 0L,
                 linearId = "",

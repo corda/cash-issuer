@@ -14,6 +14,9 @@ import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import java.time.Instant
 
+// TODO: Change this to add one transaction at a time.
+// Don't pass back the timestamp of the last added transaction. as this flow could be used to add old transactions.
+
 /**
  * Records a list of nostro transaction objects. We can batch up issuance of these as nostro transaction states always
  * remain private to the issuer node. We want this flow to finish as soon as possible, so we can return back to the

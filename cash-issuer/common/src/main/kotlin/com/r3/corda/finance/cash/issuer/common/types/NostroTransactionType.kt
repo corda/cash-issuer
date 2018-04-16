@@ -7,5 +7,6 @@ enum class NostroTransactionType {
     UNKNOWN,
     ISSUANCE,
     REDEMPTION,
-    INTERNAL_TRANSFER
+    COLLATERAL_TRANSFER,
+    ISSUER_INCOME
 }

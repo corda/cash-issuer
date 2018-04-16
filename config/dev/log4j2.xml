@@ -56,4 +56,10 @@
         </Logger>
     </Loggers>
 
+    <Root>
+        <level value="INFO">
+            <appender-ref ref="console"/>
+        </level>
+    </Root>
+
 </Configuration>

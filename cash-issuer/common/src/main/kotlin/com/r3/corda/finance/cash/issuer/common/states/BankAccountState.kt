@@ -2,6 +2,7 @@ package com.r3.corda.finance.cash.issuer.common.states
 
 import com.r3.corda.finance.cash.issuer.common.schemas.BankAccountStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
+import com.r3.corda.finance.cash.issuer.common.types.BankAccountType
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -17,6 +18,7 @@ data class BankAccountState(
         val accountName: String,
         val accountNumber: AccountNumber,
         val currency: Currency,
+        val type: BankAccountType,
         val verified: Boolean,
         override val participants: List<AbstractParty>,
         override val linearId: UniqueIdentifier,
@@ -28,8 +30,9 @@ data class BankAccountState(
             accountId: String,
             accountName: String,
             accountNumber: AccountNumber,
-            currency: Currency
-    ) : this(owner, accountName, accountNumber, currency, false, listOf(owner), UniqueIdentifier(accountId))
+            currency: Currency,
+            type: BankAccountType
+    ) : this(owner, accountName, accountNumber, currency, type, false, listOf(owner), UniqueIdentifier(accountId))
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
@@ -38,6 +41,7 @@ data class BankAccountState(
                     accountName = accountName,
                     accountNumber = accountNumber.digits,
                     currency = currency.currencyCode,
+                    type = type.name,
                     verified = verified,
                     lastUpdated = lastUpdated.toEpochMilli(),
                     linearId = linearId.id.toString(),
