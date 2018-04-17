@@ -35,6 +35,8 @@ data class UKAccountNumber(override val digits: String) : AccountNumber {
         }
     }
 
+    override fun toString() = "Sort Code: $sortCode Account Number: $accountNumber"
+
 }
 
 /**

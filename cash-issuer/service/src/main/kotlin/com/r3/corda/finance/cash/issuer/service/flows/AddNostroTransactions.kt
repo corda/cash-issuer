@@ -41,6 +41,8 @@ class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) 
         // As we are polling for new transactions, there might not be any new transactions to add.
         // This should really be checked on the RPC client side but just double checking it here
         // as well, otherwise we'll end up trying to commit transactions with no output states!
+        newNostroTransactions.forEach { logger.info(it.toString()) }
+
         if (newNostroTransactions.isEmpty()) {
             return emptyMap()
         }
@@ -48,6 +50,10 @@ class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) 
         // Filter out transactions which have been added before.
         val transactionsToRecord = newNostroTransactions.filter { (transactionId) ->
             getNostroTransactionStateByTransactionId(transactionId, serviceHub) == null
+        }
+
+        if (transactionsToRecord.isEmpty()) {
+            return emptyMap()
         }
 
         // Convert into an unmapped nostro transaction state.

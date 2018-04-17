@@ -13,6 +13,9 @@ import net.corda.core.schemas.QueryableState
 import java.time.Instant
 import java.util.*
 
+// TODO: Maybe change verified property to whitelisted.
+// The same principle applies to all accounts, customers and issuers.
+// Only match transactions once the accounts have been verified/whitelisted.
 data class BankAccountState(
         val owner: Party,
         val accountName: String,

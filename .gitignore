@@ -72,3 +72,5 @@ crashlytics-build.properties
 
 # docs related
 docs/virtualenv/
+/cash-issuer/daemon/src/main/resources/starling.conf
+/cash-issuer/daemon/src/main/resources/monzo.conf

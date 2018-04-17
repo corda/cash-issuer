@@ -10,6 +10,7 @@ import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Query
 import rx.Observable
+import rx.schedulers.Schedulers
 import java.time.Instant
 import java.util.*
 
@@ -32,6 +33,7 @@ interface Monzo {
     fun transaction(@Query("transaction_id") transactionId: String): Observable<MonzoTransaction>
 }
 
+@Suppress("UNUSED")
 class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
     override val api: Monzo = OpenBankingApiFactory(Monzo::class.java, apiConfig).build()
 
@@ -56,10 +58,23 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
         }
     }
 
-    fun balance(accountId: String?): Amount<Currency> {
+    override fun balance(accountId: BankAccountId?): Amount<Currency> {
         if (accountId == null) throw IllegalArgumentException("AccountId is required for Monzo::balance.")
         val balance = api.balance(accountId).getOrThrow()
         return Amount(balance.balance, balance.currency)
+    }
+
+    override fun transactionsFeed(): Observable<List<NostroTransaction>> {
+        val transactions = accounts.map { account ->
+            val accountId = account.accountId
+            val lastTransactionTimestamp = lastTransactions[accountId]?.toString()
+            api.transactions(account.accountId, null, lastTransactionTimestamp, null).observeOn(Schedulers.io()).map {
+                it.transactions.map { it.toNostroTransaction(ourAccount = account.accountNumber) }
+            }
+        }
+
+        // Merge and then flatten the feeds for all accounts.
+        return Observable.merge(transactions)
     }
 }
 
@@ -116,7 +131,7 @@ fun MonzoTransaction.toNostroTransaction(ourAccount: AccountNumber): NostroTrans
     // Either we have an account number, or we don't.
     val theirAccount = counterparty?.let {
         if (it.sort_code == null || it.account_number == null) NoAccountNumber()
-        else UKAccountNumber(it.account_number, it.sort_code)
+        else UKAccountNumber(it.sort_code, it.account_number)
     } ?: NoAccountNumber()
 
     // Monzo uses positive amounts for deposits and negative amounts for
