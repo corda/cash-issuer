@@ -8,6 +8,9 @@ buildscript {
     ext.quasar_version = '7629695563deae6cc95adcfbebcbc8322fd0241a'
     ext.retrofit_version = '2.4.0'
     ext.jopt_simple_version = '5.0.2'
+    ext.braid_version = '3.0.5-SNAPSHOT'
+    ext.slf4j_version = '1.7.25'
+    ext.log4j_version = '2.9.1'
 
     repositories {
         mavenLocal()
@@ -28,6 +31,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/'}
     maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
 }
 
@@ -105,6 +109,10 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         name "O=Notary,L=London,C=GB"
         notary = [validating : false]
         p2pPort 10002
+        rpcSettings {
+            address("localhost:10003")
+            adminAddress("localhost:10043")
+        }
         cordapps = []
     }
     node {

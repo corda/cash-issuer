@@ -14,6 +14,7 @@ apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordapp'
 apply plugin: 'net.corda.plugins.cordformation'
 apply plugin: 'net.corda.plugins.quasar-utils'
+apply plugin: 'project-report'
 
 sourceSets {
     main {
@@ -58,9 +59,19 @@ dependencies {
     // CorDapp dependencies
     // JOpt: for command line flags.
     compile "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
+    compile "com.squareup.okhttp3:logging-interceptor:3.9.1"
     compile "com.squareup.retrofit2:retrofit:$retrofit_version"
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
     compile "com.squareup.retrofit2:converter-jackson:$retrofit_version"
+
+//    compile "org.apache.logging.log4j:log4j-core:$log4j_version"
+//    compile "org.slf4j:jcl-over-slf4j:$slf4j_version"
+//    compile "org.slf4j:slf4j-api:$slf4j_version"
+
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
+    compile "org.apache.logging.log4j:log4j-web:$log4j_version"
+    compile "org.slf4j:jul-to-slf4j:$slf4j_version"
+
     cordapp project(":cash-issuer:common")
     cordapp project(":cash-issuer:service") // TODO: Move shared flow definitions into another module.
 }

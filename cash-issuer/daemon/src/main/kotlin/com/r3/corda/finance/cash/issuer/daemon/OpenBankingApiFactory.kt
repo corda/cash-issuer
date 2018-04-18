@@ -2,29 +2,39 @@ package com.r3.corda.finance.cash.issuer.daemon
 
 import net.corda.client.jackson.JacksonSupport
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.concurrent.TimeUnit
+
 
 class OpenBankingApiFactory<T : Any>(private val service: Class<T>, private val config: ApiConfig) {
 
     private val additionalHeaders: MutableMap<String, String> = mutableMapOf()
 
     private fun createOkHttpClient(headers: Map<String, String>): OkHttpClient {
-        val builder = OkHttpClient().newBuilder()
-        // TODO: Add the capability to customise an http request.
-        builder.readTimeout(10, TimeUnit.SECONDS)
-        builder.connectTimeout(5, TimeUnit.SECONDS)
+        return OkHttpClient().newBuilder().apply {
+            // TODO: Add the capability to customise an http request.
+            readTimeout(10, TimeUnit.SECONDS)
+            connectTimeout(5, TimeUnit.SECONDS)
 
-        builder.addInterceptor { chain ->
-            val request = chain.request().newBuilder().apply {
-                headers.forEach { key, value -> addHeader(key, value) }
+            // Add logging.
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+
+            // Add default header.
+            addInterceptor { chain ->
+                val request = chain.request().newBuilder().apply {
+                    headers.forEach { key, value -> addHeader(key, value) }
+                }
+                chain.proceed(request.build())
             }
-            chain.proceed(request.build())
-        }
 
-        return builder.build()
+            addInterceptor(loggingInterceptor)
+
+
+        }.build()
     }
 
     fun withAdditionalHeaders(headers: Map<String, String>): OpenBankingApiFactory<T> {

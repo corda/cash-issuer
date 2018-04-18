@@ -45,11 +45,18 @@ private fun welcome() {
     println()
 }
 
-private fun repl(daemon: Daemon) {
+private fun repl(daemon: Daemon, cmdLineOptions: CommandLineOptions) {
     fun prompt() = print("> ")
     val scanner = Scanner(System.`in`)
-    print("\nEnter a command ")
-    prompt()
+
+    if (cmdLineOptions.autoMode) {
+        println("\nAuto-mode set to TRUE. ")
+        println("Polling for transactions from all registered APIs at FIVE second intervals...")
+    } else {
+        print("\nEnter a command ")
+        prompt()
+    }
+
     while (true) {
         val command = scanner.nextLine()
         when (command) {
@@ -82,5 +89,5 @@ fun main(args: Array<String>) {
     val services = connectToCordaRpc(cmdLineOptions.rpcHostAndPort, cmdLineOptions.rpcUser, cmdLineOptions.rpcPass)
     welcome()
     val daemon = if (cmdLineOptions.mockMode) MockDaemon(services, cmdLineOptions) else Daemon(services, cmdLineOptions)
-    repl(daemon as Daemon)
+    repl(daemon as Daemon, cmdLineOptions)
 }

@@ -46,7 +46,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="Console-Appender"/>
             <AppenderRef ref="RollingFile-Appender"/>
         </Root>
@@ -55,11 +55,5 @@
             <AppenderRef ref="RollingFile-Appender"/>
         </Logger>
     </Loggers>
-
-    <Root>
-        <level value="INFO">
-            <appender-ref ref="console"/>
-        </level>
-    </Root>
 
 </Configuration>

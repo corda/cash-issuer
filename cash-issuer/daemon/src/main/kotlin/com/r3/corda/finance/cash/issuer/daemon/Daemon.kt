@@ -36,33 +36,36 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
         }
     }
 
-    init {
-        // 1. Add all bank accounts for all API clients.
-        addAllBankAccounts()
-        // 2. Query nostro balances on Corda and via the APIs.
-        val balances = getAllBalances()
-        printBalances(balances)
-        getLastRecordedNostroTransactions()
-    }
-
     private var subscriber: Subscription? = null
     private val transactionsFeed = Observable
             .interval(5, TimeUnit.SECONDS, Schedulers.io())
             .flatMap { Observable.merge(openBankingApiClients.map(OpenBankingApiClient::transactionsFeed)) }
             .doOnError { println(it.message) }
 
+    init {
+        // 1. Add all bank accounts for all API clients.
+        addAllBankAccounts()
+        // 2. Query nostro balances on Corda and via the APIs.
+        val balances = getAllBalances()
+        printBalances(balances)
+        // 3. Get the last recorded transactions on the node for each account. It might be the case that the node has
+        // the last transaction for an account but is missing one inbetween. In this case, a reconciliation of
+        // transaction IDs must be performed.
+        getLastRecordedNostroTransactions()
+        // 4. Start the polling if auto-mode is enabled.
+        if (cmdLineOptions.autoMode) {
+            start()
+        }
+    }
+
     fun start() {
         subscriber = transactionsFeed.subscribe {
-            println(it)
             if (it.isNotEmpty()) {
                 println("Adding ${it.size} nostro transactions to the issuer node.")
                 val addedTransactions = services.startFlowDynamic(AddNostroTransactions::class.java, it).returnValue.getOrThrow()
                 addedTransactions.forEach { accountId, timestamp ->
                     // Update the last stored transaction timestamp.
-                    // For monzo, if we provide the last timestamp the API always returns the last transaction. So
-                    // here the timestamp in incremented by 1 millisecond.
-                    // TODO: Remove this hack and use the transaction ID instead.
-                    accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp.plusMillis(1L).toEpochMilli())
+                    accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp.toEpochMilli())
                     val bankApiName = accountsToBank[accountId]!!::class.java.simpleName
                     println("Updated $accountId for $bankApiName with the last seen timestamp $timestamp.")
                 }
@@ -131,7 +134,7 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
     private fun printBalances(balances: List<Balance>) {
         println("\nChecking bank balances for differences...\n")
         println("\tAccount ID\t\t\t\tNode Balance\t\tBank Balance\t\tDifference")
-        println("\t--------------\t\t\t------------\t\t------------\t\t----------")
+        println("\t----------\t\t\t\t------------\t\t------------\t\t----------")
         var totalDifference = 0L
         balances.forEach { (accountId, node, bank) ->
             val id = accountId.truncate()
@@ -150,8 +153,8 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
         println("\nQuerying Issuer node for last recorded transactions per nostro account...\n")
         val lastUpdatesByAccountId = services.startFlowDynamic(GetLastUpdatesByAccountId::class.java).returnValue.getOrThrow()
         if (lastUpdatesByAccountId.isNotEmpty()) {
-            println("\tAccount Number\t\t\tTimestamp")
-            println("\t--------------\t\t\t---------")
+            println("\tAccount ID\t\t\t\tTimestamp")
+            println("\t----------\t\t\t\t---------")
             lastUpdatesByAccountId.forEach { (accountId, timestamp) ->
                 println("\t${accountId.truncate()}\t\t$timestamp")
                 accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp)

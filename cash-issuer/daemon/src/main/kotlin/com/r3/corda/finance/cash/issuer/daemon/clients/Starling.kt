@@ -1,10 +1,7 @@
 package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.r3.corda.finance.cash.issuer.common.types.BankAccount
-import com.r3.corda.finance.cash.issuer.common.types.NoAccountNumber
-import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
-import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
+import com.r3.corda.finance.cash.issuer.common.types.*
 import com.r3.corda.finance.cash.issuer.daemon.BankAccountId
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiClient
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiFactory
@@ -39,10 +36,10 @@ interface Starling {
     fun contactAccount(@Path("contactId") contactId: String, @Path("accountId") accountId: String): Observable<StarlingContactAccount>
 
     @GET("transactions/fps/out/{transactionId}")
-    fun fpsOut(@Path("transactionId") transactionId: String): Observable<StarlingFpsOutTransaction>
+    fun fpsOut(@Path("transactionId") transactionId: String): Observable<StarlingFpsTransaction>
 
     @GET("transactions/fps/in/{transactionId}")
-    fun fpsIn(@Path("transactionId") contactId: String): Observable<StarlingFpsInTransaction>
+    fun fpsIn(@Path("transactionId") contactId: String): Observable<StarlingFpsTransaction>
 }
 
 @Suppress("UNUSED")
@@ -77,11 +74,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
     override fun transactionsFeed(): Observable<List<NostroTransaction>> {
         // There's only one account with Starling for the time being.
         val lastTransaction = lastTransactions.values.singleOrNull()
-        val from = if (lastTransaction != null) {
-            getDateStringFromInstant(lastTransaction)
-        } else {
-            null
-        }
+        val from = if (lastTransaction != null) getDateStringFromInstant(lastTransaction) else null
         return api.transactions(from, null).observeOn(Schedulers.io()).map {
             it._embedded.transactions.map {
                 toNostroTransaction(it)
@@ -90,9 +83,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
                 // to query for transactions. As we have the last transaction
                 // timestamp we can filter out all the transactions we've
                 // already seen.
-                // TODO: Fix this from throwing an NPE (see that it is null above if no previous transactions have been stored.
-                // TODO: Also fix the monzo API from returning one transaction. Get the API to return the Nostro transaction state as opposed to one property of it.
-                it.createdAt > lastTransaction
+                it.createdAt > (lastTransaction ?: Instant.EPOCH)
             }
         }
     }
@@ -101,33 +92,33 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
         // We must multiply the amount by 100 as Starling uses decimals.
         val amount = tx.amount.toLong() * 100
         val account = accounts.single()
-        return when (tx.source) {
-            "FASTER_PAYMENTS_IN" -> {
-                // Get the counterparty IDs.
-                val txDetail = api.fpsIn(tx.id).getOrThrow()
-                // Get the account info.
-                val contactDetail = api.contactAccount(txDetail.sendingContactId, txDetail.sendingContactAccountId).getOrThrow()
-                val contactAccount = UKAccountNumber(contactDetail.accountNumber, contactDetail.sortCode)
-                NostroTransaction(tx.id, account.accountId, amount, tx.currency, tx.source, tx.narrative, tx.created, contactAccount, account.accountNumber)
-            }
-            "FASTER_PAYMENTS_OUT" -> {
-                val txDetail = api.fpsOut(tx.id).getOrThrow()
-                val contactDetail = api.contactAccount(txDetail.receivingContactId, txDetail.receivingContactAccountId).getOrThrow()
-                val contactAccount = UKAccountNumber(contactDetail.accountNumber, contactDetail.sortCode)
-                NostroTransaction(tx.id, account.accountId, amount, tx.currency, tx.source, tx.narrative, tx.created, account.accountNumber, contactAccount)
-            }
-            else -> {
-                // If it's not a faster payment then we probably don't have the counterparty account details, so we
-                // just add our account details and the rest stays null. Not much else we can do unless the party that
-                // is sending cash to Starling account provides us their account number and sort code before they make
-                // the transfer.
-                if (tx.direction == "INBOUND") {
-                    NostroTransaction(tx.id, account.accountId, amount, tx.currency, tx.source, tx.narrative, tx.created, NoAccountNumber(), account.accountNumber)
-                } else {
-                    NostroTransaction(tx.id, account.accountId, amount, tx.currency, tx.source, tx.narrative, tx.created, account.accountNumber, NoAccountNumber())
-                }
+
+        // Function to get the account sort code and number as Starling doesn't provide it in the transaction data.
+        // It might be the case that no account number is available for some transactions.
+        fun getContactAccount(block: () -> StarlingFpsTransaction): AccountNumber {
+            val details = block()
+            return if (details.sendingContactId == null || details.sendingContactAccountId == null) {
+                NoAccountNumber()
+            } else {
+                val contactAccount = api.contactAccount(details.sendingContactId, details.sendingContactAccountId).getOrThrow()
+                UKAccountNumber(contactAccount.accountNumber, contactAccount.sortCode)
             }
         }
+
+        val (source, destination) = when (tx.direction) {
+            "INBOUND" -> {
+                // Get the account info.
+                val contactAccount = getContactAccount { api.fpsIn(tx.id).getOrThrow() }
+                Pair(account.accountNumber, contactAccount)
+            }
+            "OUTBOUND" -> {
+                val contactAccount = getContactAccount { api.fpsOut(tx.id).getOrThrow() }
+                Pair(contactAccount, account.accountNumber)
+            }
+            else -> throw IllegalStateException("This shouldn't happen.")
+        }
+
+        return NostroTransaction(tx.id, account.accountId, amount, tx.currency, tx.source, tx.narrative, tx.created, source, destination)
     }
 }
 
@@ -208,10 +199,7 @@ data class StarlingTransaction(
 )
 
 /**
- * Two endpoints for getting the contact ID for counterparties/contacts.
+ * For getting the contact ID for counterparties/contacts.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class StarlingFpsInTransaction(val sendingContactId: String, val sendingContactAccountId: String)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class StarlingFpsOutTransaction(val receivingContactId: String, val receivingContactAccountId: String)
+data class StarlingFpsTransaction(val sendingContactId: String?, val sendingContactAccountId: String?)

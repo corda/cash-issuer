@@ -67,8 +67,11 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
     override fun transactionsFeed(): Observable<List<NostroTransaction>> {
         val transactions = accounts.map { account ->
             val accountId = account.accountId
-            val lastTransactionTimestamp = lastTransactions[accountId]?.toString()
-            api.transactions(account.accountId, null, lastTransactionTimestamp, null).observeOn(Schedulers.io()).map {
+            // For monzo, if we provide the last timestamp the API always returns the last transaction. So
+            // here the timestamp in incremented by 1 millisecond.
+            // TODO: Remove this hack and use the transaction ID instead.
+            val lastTransactionTimestamp = lastTransactions[accountId]?.plusMillis(1L)
+            api.transactions(account.accountId, null, lastTransactionTimestamp?.toString(), null).observeOn(Schedulers.io()).map {
                 it.transactions.map { it.toNostroTransaction(ourAccount = account.accountNumber) }
             }
         }
