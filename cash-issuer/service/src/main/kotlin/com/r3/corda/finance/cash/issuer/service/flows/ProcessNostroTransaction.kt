@@ -40,6 +40,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
 
     @Suspendable
     override fun call(): SignedTransaction {
+        logger.info("Starting ProcessNostroTransaction flow.")
         // For brevity.
         val nostroTransaction = stateAndRef.state.data
         val amountTransfer = nostroTransaction.amountTransfer
@@ -87,7 +88,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         val isRedemption = amountTransfer.quantityDelta < 0L && (isDoubleMatchExternalTransfer || issuerMatchOnly)
 
         // Add whatever nostro account states we have in the list.
-        bankAccountStateRefs.forEach { builder.addReferenceState(it) }
+        bankAccountStateRefs.forEach { builder.addReferenceState(it.referenced()) }
 
         when {
             areNoMatches -> throw FlowException("We should always, at least, have our bank account data recorded.")
@@ -103,6 +104,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
             }
             isIssuance -> {
                 createBaseTransaction(builder, NostroTransactionType.ISSUANCE, NostroTransactionStatus.MATCHED)
+                // TODO: Check that accounts are verified.
                 logger.info("This is an issuance!")
             }
             isRedemption -> {

@@ -109,11 +109,11 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
             "INBOUND" -> {
                 // Get the account info.
                 val contactAccount = getContactAccount { api.fpsIn(tx.id).getOrThrow() }
-                Pair(account.accountNumber, contactAccount)
+                Pair(contactAccount, account.accountNumber)
             }
             "OUTBOUND" -> {
                 val contactAccount = getContactAccount { api.fpsOut(tx.id).getOrThrow() }
-                Pair(contactAccount, account.accountNumber)
+                Pair(account.accountNumber, contactAccount)
             }
             else -> throw IllegalStateException("This shouldn't happen.")
         }

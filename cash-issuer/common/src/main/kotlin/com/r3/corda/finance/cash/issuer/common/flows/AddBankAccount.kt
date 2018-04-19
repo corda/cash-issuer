@@ -32,7 +32,10 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
 
     @Suspendable
     override fun call(): SignedTransaction {
+        logger.info("Starting AddBankAccount flow.")
         val accountNumber = bankAccount.accountNumber
+
+        logger.info("Checking for existence of state for $bankAccount.")
         val result = getBankAccountStateByAccountNumber(accountNumber, serviceHub)
 
         if (result != null) {
@@ -40,7 +43,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
             throw IllegalArgumentException("Bank account $accountNumber already exists with linearId ($linearId).")
         }
 
-        logger.info("Adding $bankAccount.")
+        logger.info("No state for $bankAccount. Adding it.")
         val bankAccountState = bankAccount.toState(ourIdentity)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 

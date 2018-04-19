@@ -1,11 +1,14 @@
 package com.r3.corda.finance.cash.issuer.service.services
 
 import com.r3.corda.finance.cash.issuer.common.contracts.BankAccountContract
+import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
 import com.r3.corda.finance.cash.issuer.service.flows.ProcessNostroTransaction
+import com.r3.corda.finance.cash.issuer.service.flows.VerifyBankAccount
+import net.corda.core.contracts.CommandData
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -14,10 +17,10 @@ import net.corda.core.utilities.loggerFor
 import rx.schedulers.Schedulers
 
 @CordaService
-class NewNostroTransactionObserver(val services: AppServiceHub) : SingletonSerializeAsToken() {
+class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsToken() {
 
     companion object {
-        val logger = loggerFor<NewNostroTransactionObserver>()
+        val logger = loggerFor<UpdateObserverService>()
     }
 
     init {
@@ -26,41 +29,57 @@ class NewNostroTransactionObserver(val services: AppServiceHub) : SingletonSeria
         // event being emitted and the flow starting, then the flows will have to be started manually.
         // We can do this by pulling out all the nostro transaction states and running the process flow over
         // all UNMATCHED states.
-        services.validatedTransactions.updates.observeOn(Schedulers.io()).subscribe { signedTransaction ->
+        services.validatedTransactions.updates.observeOn(Schedulers.io()).subscribe({ signedTransaction ->
+
+            val isAddBankAccount = checkCommand<BankAccountContract.Add>(signedTransaction)
+            val isUpdateBankAccount = checkCommand<BankAccountContract.Update>(signedTransaction)
+            val isAddNostroTransaction = checkCommand<NostroTransactionContract.Add>(signedTransaction)
+            val isMatchNostroTransaction = checkCommand<NostroTransactionContract.Match>(signedTransaction)
+
+            logger.info("isAddBankAccount=$isAddBankAccount,isAddNostroTx=$isAddNostroTransaction,isMatchNostroTx=" +
+                    "$isAddNostroTransaction,isUpdateBankAccount=$isUpdateBankAccount")
+
             when {
-                isAddBankAccount(signedTransaction) -> {
+                isAddBankAccount -> {
                     logger.info("Start the verify flow. Issuer can auto verify their own accounts!")
+                    verifyBankAccount(signedTransaction)
                 }
-                isAddNostroTransaction(signedTransaction) -> {
+                isUpdateBankAccount -> {
+                    logger.info("Just updated a BankAccountState. Don't need to do anything.")
+                }
+                isAddNostroTransaction -> {
                     logger.info("Processing a newly added nostro transaction...")
                     addNostroTransactionAction(signedTransaction)
                 }
-                isMatchNostroTransaction(signedTransaction) -> {
-                    logger.info("A full or partial nostro transaction match has occured...")
+                isMatchNostroTransaction -> {
+                    logger.info("A full or partial nostro transaction match has occurred...")
                     matchNostroTransactionAction(signedTransaction)
                 }
+                else -> logger.info("Transaction type not recognised.")
             }
-        }
+        }, { throwable -> logger.info(throwable.message) })
     }
 
-    private fun isAddBankAccount(stx: SignedTransaction) = stx.tx.commands.singleOrNull {
-        it.value is BankAccountContract.Add
-    } != null
+    inline fun <reified T : CommandData> checkCommand(stx: SignedTransaction): Boolean {
+        return stx.tx.commands.singleOrNull { it.value is T } != null
+    }
 
-    private fun isAddNostroTransaction(stx: SignedTransaction) = stx.tx.commands.singleOrNull {
-        it.value is NostroTransactionContract.Add
-    } != null
-
-    private fun isMatchNostroTransaction(stx: SignedTransaction) = stx.tx.commands.singleOrNull {
-        it.value is NostroTransactionContract.Match
-    } != null
+    /**
+     * We are the issuer, all our bank accounts should be verified - they are ours!
+     */
+    private fun verifyBankAccount(signedTransaction: SignedTransaction) {
+        val transaction = signedTransaction.tx
+        // Process all nostro transactions which have been added.
+        // We can add more than one at a time.
+        val accountNumber = transaction.outRefsOfType<BankAccountState>().single().state.data.accountNumber
+        services.startFlow(VerifyBankAccount(accountNumber))
+    }
 
     private fun addNostroTransactionAction(signedTransaction: SignedTransaction) {
         val transaction = signedTransaction.tx
         // Process all nostro transactions which have been added.
         // We can add more than one at a time.
         transaction.outRefsOfType<NostroTransactionState>().forEach {
-            logger.info("Adding a state")
             services.startFlow(ProcessNostroTransaction(it))
         }
     }
@@ -76,7 +95,8 @@ class NewNostroTransactionObserver(val services: AppServiceHub) : SingletonSeria
 
         // Start the issue cash flow.
         if (isMatched && isIssuance) {
-            services.startFlow(IssueCash(signedTransaction))
+            logger.info("Issuing cash!")
+            //services.startFlow(IssueCash(signedTransaction))
         }
     }
 

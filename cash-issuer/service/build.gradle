@@ -57,6 +57,7 @@ dependencies {
 
     // CorDapp dependencies
     cordapp project(":cash-issuer:common")
+    cordapp project(":cash:kernel")
 }
 
 task integrationTest(type: Test, dependsOn: []) {

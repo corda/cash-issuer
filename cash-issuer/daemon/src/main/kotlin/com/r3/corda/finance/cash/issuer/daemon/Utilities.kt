@@ -19,3 +19,5 @@ fun <T : Any> Observable<T>.getOrThrow() = observeOn(Schedulers.io())
 
 fun BankAccountId.truncate() = "${this.take(16)}..."
 
+
+

@@ -13,7 +13,7 @@ class BankAccountContract : Contract {
 
     interface Commands : CommandData
     class Add : Commands
-    class Verify : Commands
+    class Update : Commands
 
     override fun verify(tx: LedgerTransaction) = Unit
 
