@@ -35,7 +35,7 @@ interface Monzo {
 
 @Suppress("UNUSED")
 class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
-    override val api: Monzo = OpenBankingApiFactory(Monzo::class.java, apiConfig).build()
+    override val api: Monzo = OpenBankingApiFactory(Monzo::class.java, apiConfig, logger).build()
 
     private val _accounts: Map<BankAccountId, BankAccount> by lazy {
         accounts().map { it.accountId to it }.toMap()
@@ -96,7 +96,7 @@ data class MonzoAccount(
 )
 
 fun MonzoAccount.toBankAccount(currency: Currency): BankAccount {
-    val accountNumber = if (account_number == null || sort_code == null) NoAccountNumber() else UKAccountNumber(account_number, sort_code)
+    val accountNumber = if (account_number == null || sort_code == null) NoAccountNumber() else UKAccountNumber(sort_code, account_number)
     return BankAccount(id, description, accountNumber, currency)
 }
 

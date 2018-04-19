@@ -44,7 +44,7 @@ interface Starling {
 
 @Suppress("UNUSED")
 class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
-    override val api = OpenBankingApiFactory(Starling::class.java, apiConfig)
+    override val api = OpenBankingApiFactory(Starling::class.java, apiConfig, logger)
             .withAdditionalHeaders(mapOf("User-Agent" to "R3 Issuer Ltd"))
             .build()
 
@@ -101,7 +101,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
                 NoAccountNumber()
             } else {
                 val contactAccount = api.contactAccount(details.sendingContactId, details.sendingContactAccountId).getOrThrow()
-                UKAccountNumber(contactAccount.accountNumber, contactAccount.sortCode)
+                UKAccountNumber(contactAccount.sortCode, contactAccount.accountNumber)
             }
         }
 

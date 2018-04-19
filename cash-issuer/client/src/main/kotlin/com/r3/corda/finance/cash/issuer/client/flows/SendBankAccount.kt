@@ -9,10 +9,12 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.SendStateAndRefFlow
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.flows.StartableByService
 import net.corda.core.identity.Party
 import net.corda.core.utilities.ProgressTracker
 
 @StartableByRPC
+@StartableByService
 class SendBankAccount(val issuer: Party, val linearId: UniqueIdentifier) : AbstractSendBankAccount() {
 
     companion object {

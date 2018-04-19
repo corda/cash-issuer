@@ -10,11 +10,13 @@ import net.corda.core.contracts.StateAndContract
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 
 @StartableByRPC
+@StartableByService
 class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction>() {
 
     companion object {

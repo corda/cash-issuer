@@ -1,10 +1,23 @@
 package com.r3.corda.finance.cash.issuer.common.types
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.corda.core.serialization.CordaSerializable
 
 /**
  * Marker interface for bank account numbers.
  */
+// TODO: Remove this hack at some point.
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes(
+        JsonSubTypes.Type(value = UKAccountNumber::class, name = "uk"),
+        JsonSubTypes.Type(value = NoAccountNumber::class, name = "none")
+)
 @CordaSerializable
 interface AccountNumber {
     val digits: String
@@ -16,6 +29,7 @@ interface AccountNumber {
 @CordaSerializable
 data class UKAccountNumber(override val digits: String) : AccountNumber {
 
+    @JsonCreator
     constructor(sortCode: String, accountNumber: String) : this("$sortCode$accountNumber")
 
     val sortCode get() = digits.subSequence(0, 6)

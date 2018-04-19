@@ -13,6 +13,7 @@ class NostroTransactionContract : Contract {
 
     interface Commands : CommandData
     class Add : Commands
+    class Match : Commands
 
     override fun verify(tx: LedgerTransaction) {
 //        val command = tx.commands.requireSingleCommand<Commands>()

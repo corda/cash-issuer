@@ -3,13 +3,14 @@ package com.r3.corda.finance.cash.issuer.daemon
 import net.corda.client.jackson.JacksonSupport
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.slf4j.Logger
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-class OpenBankingApiFactory<T : Any>(private val service: Class<T>, private val config: ApiConfig) {
+class OpenBankingApiFactory<T : Any>(val service: Class<T>, val config: ApiConfig, val logger: Logger) {
 
     private val additionalHeaders: MutableMap<String, String> = mutableMapOf()
 
@@ -20,8 +21,10 @@ class OpenBankingApiFactory<T : Any>(private val service: Class<T>, private val 
             connectTimeout(5, TimeUnit.SECONDS)
 
             // Add logging.
-            val loggingInterceptor = HttpLoggingInterceptor()
+            val logger = HttpLoggingInterceptor.Logger { s -> logger.debug(s) }
+            val loggingInterceptor = HttpLoggingInterceptor(logger)
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+            addInterceptor(loggingInterceptor)
 
             // Add default header.
             addInterceptor { chain ->
