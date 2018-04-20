@@ -6,8 +6,7 @@ import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByLinearId
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.SendStateAndRefFlow
+import net.corda.core.flows.SendTransactionFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService
 import net.corda.core.identity.Party
@@ -19,10 +18,7 @@ class SendBankAccount(val issuer: Party, val linearId: UniqueIdentifier) : Abstr
 
     companion object {
         // TODO: Add the rest of the progress tracker.
-        object SENDING : ProgressTracker.Step("Sending to issuer.") {
-            override fun childProgressTracker() = FinalityFlow.tracker()
-        }
-
+        object SENDING : ProgressTracker.Step("Sending to issuer.")
         fun tracker() = ProgressTracker(SENDING)
     }
 
@@ -32,9 +28,12 @@ class SendBankAccount(val issuer: Party, val linearId: UniqueIdentifier) : Abstr
     override fun call(): StateAndRef<BankAccountState> {
         val bankAccountState = getBankAccountStateByLinearId(linearId, serviceHub)
                 ?: throw IllegalArgumentException("LinearId $linearId does not match any bank account state.")
-        val session = initiateFlow(issuer)
+        val transactionHash = bankAccountState.ref.txhash
+        val transaction = serviceHub.validatedTransactions.getTransaction(bankAccountState.ref.txhash)
+                ?: throw IllegalArgumentException("Couldn't find transaction $transactionHash.")
         progressTracker.currentStep = SENDING
-        subFlow(SendStateAndRefFlow(session, listOf(bankAccountState)))
+        val session = initiateFlow(issuer)
+        subFlow(SendTransactionFlow(session, transaction))
         return bankAccountState
     }
 

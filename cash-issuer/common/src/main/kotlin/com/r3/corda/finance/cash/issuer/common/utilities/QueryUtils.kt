@@ -79,3 +79,20 @@ fun getNostroAccountBalances(services: ServiceHub): Map<String, Long> {
     }
 }
 
+// TODO: Refactor this to use the above private function.
+fun getNostroTransactionsByAccountNumber(accountNumber: AccountNumber, services: ServiceHub): List<StateAndRef<NostroTransactionState>> {
+    val query = builder {
+        val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.UNCONSUMED)
+        val sourceAccountNumber = QueryCriteria.VaultCustomQueryCriteria(
+                NostroTransactionStateSchemaV1.PersistentNostroTransactionState::sourceAccountNumber.equal(accountNumber.digits)
+        )
+        val destinationAccountNumber = QueryCriteria.VaultCustomQueryCriteria(
+                NostroTransactionStateSchemaV1.PersistentNostroTransactionState::destinationAccountNumber.equal(accountNumber.digits)
+        )
+        generalCriteria.and(sourceAccountNumber.or(destinationAccountNumber))
+    }
+
+    val result = services.vaultService.queryBy<NostroTransactionState>(query)
+    return result.states
+}
+

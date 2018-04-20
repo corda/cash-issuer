@@ -57,7 +57,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val builder = TransactionBuilder(notary = notary)
 
-        // It's not easy to work with StateAndRefs.
+        // It's easier to work with ContractStates.
         val bankAccountStates = bankAccountStateRefs.map { it.state.data }
 
         /** ONLY ONE OF THESE CONDITIONS SHOULD EVER BE TRUE FOR EACH NOSTRO TRANSACTION! */

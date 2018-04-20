@@ -11,11 +11,8 @@ import net.corda.core.transactions.SignedTransaction
 
 @InitiatedBy(AbstractSendBankAccount::class)
 class ReceiveBankAccount(val otherSession: FlowSession) : FlowLogic<SignedTransaction>() {
-
     @Suspendable
     override fun call(): SignedTransaction {
         return subFlow(ReceiveTransactionFlow(otherSession, true, StatesToRecord.ALL_VISIBLE))
-        // TODO: Run through all transactions and match them.
     }
-
 }

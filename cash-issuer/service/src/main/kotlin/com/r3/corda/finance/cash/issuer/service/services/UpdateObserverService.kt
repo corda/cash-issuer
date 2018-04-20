@@ -6,7 +6,9 @@ import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
+import com.r3.corda.finance.cash.issuer.service.flows.IssueCash
 import com.r3.corda.finance.cash.issuer.service.flows.ProcessNostroTransaction
+import com.r3.corda.finance.cash.issuer.service.flows.ReProcessNostroTransaction
 import com.r3.corda.finance.cash.issuer.service.flows.VerifyBankAccount
 import net.corda.core.contracts.CommandData
 import net.corda.core.node.AppServiceHub
@@ -37,12 +39,12 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
             val isMatchNostroTransaction = checkCommand<NostroTransactionContract.Match>(signedTransaction)
 
             logger.info("isAddBankAccount=$isAddBankAccount,isAddNostroTx=$isAddNostroTransaction,isMatchNostroTx=" +
-                    "$isAddNostroTransaction,isUpdateBankAccount=$isUpdateBankAccount")
+                    "$isMatchNostroTransaction,isUpdateBankAccount=$isUpdateBankAccount")
 
             when {
                 isAddBankAccount -> {
-                    logger.info("Start the verify flow. Issuer can auto verify their own accounts!")
-                    verifyBankAccount(signedTransaction)
+                    logger.info("New bank account added.")
+                    addBankAccountAction(signedTransaction)
                 }
                 isUpdateBankAccount -> {
                     logger.info("Just updated a BankAccountState. Don't need to do anything.")
@@ -67,12 +69,17 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
     /**
      * We are the issuer, all our bank accounts should be verified - they are ours!
      */
-    private fun verifyBankAccount(signedTransaction: SignedTransaction) {
-        val transaction = signedTransaction.tx
-        // Process all nostro transactions which have been added.
-        // We can add more than one at a time.
-        val accountNumber = transaction.outRefsOfType<BankAccountState>().single().state.data.accountNumber
-        services.startFlow(VerifyBankAccount(accountNumber))
+    private fun addBankAccountAction(signedTransaction: SignedTransaction) {
+        val bankAccountState = signedTransaction.tx.outputStates.single() as BankAccountState
+        if (bankAccountState.owner == services.myInfo.legalIdentities.single()) {
+            logger.info("The issuer has just added an account. It can be immediately verified.")
+            val transaction = signedTransaction.tx
+            val accountNumber = transaction.outRefsOfType<BankAccountState>().single().state.data.accountNumber
+            services.startFlow(VerifyBankAccount(accountNumber))
+        } else {
+            logger.info("We've received an account from another node.")
+            services.startFlow(ReProcessNostroTransaction(bankAccountState))
+        }
     }
 
     private fun addNostroTransactionAction(signedTransaction: SignedTransaction) {
@@ -88,15 +95,14 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
         val transaction = signedTransaction.tx
         // Get the nostro transaction and check if it has been matched.
         val nostroTransactionState = transaction.outputsOfType<NostroTransactionState>().single()
-
         // Check whether the conditions for issuance are satisfied.
         val isMatched = nostroTransactionState.status == NostroTransactionStatus.MATCHED
         val isIssuance = nostroTransactionState.type == NostroTransactionType.ISSUANCE
-
+        logger.info("isMatched=$isMatched,isIssuance=$isIssuance")
         // Start the issue cash flow.
         if (isMatched && isIssuance) {
             logger.info("Issuing cash!")
-            //services.startFlow(IssueCash(signedTransaction))
+            services.startFlow(IssueCash(signedTransaction))
         }
     }
 

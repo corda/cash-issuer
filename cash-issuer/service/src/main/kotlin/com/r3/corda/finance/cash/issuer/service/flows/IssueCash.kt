@@ -53,7 +53,7 @@ class IssueCash(val stx: SignedTransaction) : FlowLogic<Pair<SignedTransaction, 
 
         // TODO: Add node transaction contract code to check info.
         val internalBuilder = TransactionBuilder(notary = notary)
-                .addReferenceState(nostroTransactionStateAndRef)
+                .addReferenceState(nostroTransactionStateAndRef.referenced())
                 .addOutputState(nodeTransactionState, NodeTransactionContract.CONTRACT_ID)
                 .addCommand(NodeTransactionContract.Create(), listOf(ourIdentity.owningKey))
 
@@ -69,7 +69,7 @@ class IssueCash(val stx: SignedTransaction) : FlowLogic<Pair<SignedTransaction, 
         // this issuance. We include this so we can check it during redemption time. Using this as the reference means
         // that cash states won't get merged very often as it's likely that the reference is different (one for each
         // issuance).
-        val partyAndReference = PartyAndReference(counterparty.owner, nostroTransactionStateAndRef.ref.txhash)
+        val partyAndReference = PartyAndReference(ourIdentity, internfalFtx.id)
         val issuerAndToken = Issued(partyAndReference, issuanceAmount.token)
         val amount = Amount(issuanceAmount.quantityDelta, issuerAndToken)
         val cashState = CashState(
