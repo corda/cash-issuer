@@ -5,7 +5,7 @@ import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import net.corda.core.contracts.Amount
-import net.corda.core.utilities.loggerFor
+import net.corda.core.utilities.contextLogger
 import rx.Observable
 import java.time.Instant
 import java.util.*
@@ -17,7 +17,7 @@ data class ApiConfig(val apiBaseUrl: String, val apiAccessToken: String, val acc
 // TODO: Add a feature to this class that allows sub-classes to filter accounts based on the whitelist (in the config file).
 abstract class OpenBankingApiClient(val configName: String) {
     companion object {
-        val logger = loggerFor<OpenBankingApiClient>()
+        val logger = contextLogger()
     }
 
     abstract val api: Any

@@ -6,13 +6,13 @@ import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.service.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.service.states.NodeTransactionState
-import com.r3.corda.finance.cash.states.CashState
 import net.corda.core.contracts.*
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import net.corda.finance.contracts.asset.Cash
 import java.time.Instant
 
 // TODO: Denominations? E.g. 100 split between 10 issuances of 10.
@@ -62,7 +62,7 @@ class IssueCash(val stx: SignedTransaction) : FlowLogic<Pair<SignedTransaction, 
 
         /** Commit the cash issuance transaction. */
         // Issue command.
-        val command = Command(CashContract.Issue(), listOf(ourIdentity.owningKey))
+        val command = Command(Cash.Commands.Issue(), listOf(ourIdentity.owningKey))
 
         // Create a new cash state.
         // The issuer reference is the hash of the transaction containing the nostro transaction state which led to
@@ -72,7 +72,7 @@ class IssueCash(val stx: SignedTransaction) : FlowLogic<Pair<SignedTransaction, 
         val partyAndReference = PartyAndReference(ourIdentity, internfalFtx.id)
         val issuerAndToken = Issued(partyAndReference, issuanceAmount.token)
         val amount = Amount(issuanceAmount.quantityDelta, issuerAndToken)
-        val cashState = CashState(
+        val cashState = Cash.State(
                 amount = amount,
                 owner = counterparty.owner
         )

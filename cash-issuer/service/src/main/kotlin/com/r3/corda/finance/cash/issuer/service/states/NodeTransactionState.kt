@@ -14,7 +14,7 @@ import java.time.Instant
 import java.util.*
 
 data class NodeTransactionState(
-        val amountTransfer: AmountTransfer<Currency, Party>,
+        val amountTransfer: AmountTransfer<Currency, Party>,    // TODO: Replace Party with BankAccount State.
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
         val type: NodeTransactionType = if (amountTransfer.quantityDelta > 0) NodeTransactionType.ISSUANCE else NodeTransactionType.REDEMPTION,
