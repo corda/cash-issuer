@@ -15,7 +15,7 @@ object NostroTransactionStateSchemaV1 : MappedSchema(
 ) {
 
     @Entity
-    @Table(name = "nostro_transactions")
+    @Table(name = "nostro_transaction_States")
     class PersistentNostroTransactionState(
             @Column(name = "id")
             var transactionId: String,

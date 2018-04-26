@@ -1,10 +1,13 @@
 package com.r3.corda.finance.cash.issuer.common.utilities
 
 import com.r3.corda.finance.cash.issuer.common.schemas.BankAccountStateSchemaV1
+import com.r3.corda.finance.cash.issuer.common.schemas.NodeTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -12,37 +15,52 @@ import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.Builder.equal
-import net.corda.core.node.services.vault.CriteriaExpression
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.builder
-import net.corda.core.schemas.PersistentState
 
 fun getBankAccountStateByAccountNumber(accountNumber: AccountNumber, services: ServiceHub): StateAndRef<BankAccountState>? {
-    return getState(services) {
-        BankAccountStateSchemaV1.PersistentBankAccountState::accountNumber.equal(accountNumber.digits)
+    val states = getState<BankAccountState>(services) { generalCriteria ->
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(BankAccountStateSchemaV1.PersistentBankAccountState::accountNumber.equal(accountNumber.digits))
+        generalCriteria.and(additionalCriteria)
     }
+    return states.singleOrNull()
 }
 
 fun getBankAccountStateByLinearId(linearId: UniqueIdentifier, services: ServiceHub): StateAndRef<BankAccountState>? {
-    return getState(services) {
-        BankAccountStateSchemaV1.PersistentBankAccountState::linearId.equal(linearId.id.toString())
+    val states = getState<BankAccountState>(services) { generalCriteria ->
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(BankAccountStateSchemaV1.PersistentBankAccountState::linearId.equal(linearId.id.toString()))
+        generalCriteria.and(additionalCriteria)
     }
+    return states.singleOrNull()
 }
 
 fun getNostroTransactionStateByTransactionId(transactionId: String, services: ServiceHub): StateAndRef<NostroTransactionState>? {
-    return getState(services) {
-        NostroTransactionStateSchemaV1.PersistentNostroTransactionState::transactionId.equal(transactionId)
+    val states = getState<NostroTransactionState>(services) { generalCriteria ->
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(NostroTransactionStateSchemaV1.PersistentNostroTransactionState::transactionId.equal(transactionId))
+        generalCriteria.and(additionalCriteria)
+    }
+    return states.singleOrNull()
+}
+
+fun getPendingRedemptionsByCounterparty(counterparty: String, services: ServiceHub): List<StateAndRef<NostroTransactionState>>? {
+    return getState(services) { generalCriteria ->
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::status.equal(NodeTransactionStatus.PENDING))
+        val additionalCriteriaTwo = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::type.equal(NodeTransactionType.REDEMPTION))
+        val additionalCriteriaThree = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::counterparty.equal(counterparty))
+        generalCriteria.and(additionalCriteria.and(additionalCriteriaTwo.and(additionalCriteriaThree)))
     }
 }
 
-private inline fun <T : PersistentState, reified U : ContractState> getState(services: ServiceHub, block: () -> CriteriaExpression<T, Boolean>): StateAndRef<U>? {
+private inline fun <reified U : ContractState> getState(
+        services: ServiceHub,
+        block: (generalCriteria: QueryCriteria.VaultQueryCriteria) -> QueryCriteria
+): List<StateAndRef<U>> {
     val query = builder {
         val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.UNCONSUMED)
-        val customCriteria = QueryCriteria.VaultCustomQueryCriteria(block())
-        generalCriteria.and(customCriteria)
+        block(generalCriteria)
     }
     val result = services.vaultService.queryBy<U>(query)
-    return result.states.singleOrNull()
+    return result.states
 }
 
 fun getLatestNostroTransactionStatesGroupedByAccount(services: ServiceHub): Map<String, Long> {

@@ -15,7 +15,7 @@ object BankAccountStateSchemaV1 : MappedSchema(
 ) {
 
     @Entity
-    @Table(name = "bank_accounts")
+    @Table(name = "bank_account_states")
     class PersistentBankAccountState(
             @Column(name = "owner")
             var owner: String,

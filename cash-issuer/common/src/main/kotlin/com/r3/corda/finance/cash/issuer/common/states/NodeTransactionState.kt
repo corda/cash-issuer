@@ -1,7 +1,8 @@
-package com.r3.corda.finance.cash.issuer.service.states
+package com.r3.corda.finance.cash.issuer.common.states
 
-import com.r3.corda.finance.cash.issuer.service.schemas.NodeTransactionStateSchemaV1
-import com.r3.corda.finance.cash.issuer.service.types.NodeTransactionType
+import com.r3.corda.finance.cash.issuer.common.schemas.NodeTransactionStateSchemaV1
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
@@ -14,24 +15,28 @@ import java.time.Instant
 import java.util.*
 
 data class NodeTransactionState(
-        val amountTransfer: AmountTransfer<Currency, Party>,    // TODO: Replace Party with BankAccount State.
+        val amountTransfer: AmountTransfer<Currency, Party>,
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
         val type: NodeTransactionType = if (amountTransfer.quantityDelta > 0) NodeTransactionType.ISSUANCE else NodeTransactionType.REDEMPTION,
+        val status: NodeTransactionStatus = NodeTransactionStatus.PENDING,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState, QueryableState {
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
-            is NodeTransactionStateSchemaV1 -> NodeTransactionStateSchemaV1.PersistentNodeTransactionState(
-                    issuer = amountTransfer.source.name.toString(),
-                    counterparty = amountTransfer.destination.name.toString(),
-                    amount = amountTransfer.quantityDelta,
-                    currency = amountTransfer.token.currencyCode,
-                    type = type.name,
-                    createdAt = createdAt.toEpochMilli(),
-                    linearId = linearId.id.toString()
-            )
+            is NodeTransactionStateSchemaV1 -> {
+                NodeTransactionStateSchemaV1.PersistentNodeTransactionState(
+                        issuer = amountTransfer.source.name.toString(),
+                        counterparty = amountTransfer.destination.name.toString(),
+                        amount = amountTransfer.quantityDelta,
+                        currency = amountTransfer.token.currencyCode,
+                        type = type.name,
+                        createdAt = createdAt.toEpochMilli(),
+                        status = status.name,
+                        linearId = linearId.id.toString()
+                )
+            }
             else -> throw IllegalArgumentException("Unrecognised schema $schema")
         }
     }

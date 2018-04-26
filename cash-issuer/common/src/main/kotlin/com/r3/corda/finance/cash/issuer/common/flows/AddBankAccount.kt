@@ -21,10 +21,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
 
     companion object {
         // TODO: Add the rest of the progress tracker.
-        object FINALISING : ProgressTracker.Step("Finalising transaction.") {
-            override fun childProgressTracker() = FinalityFlow.tracker()
-        }
-
+        object FINALISING : ProgressTracker.Step("Finalising transaction.")
         fun tracker() = ProgressTracker(FINALISING)
     }
 
@@ -32,7 +29,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
 
     @Suspendable
     override fun call(): SignedTransaction {
-        logger.info("Starting AddBankAccount flow.")
+        logger.info("Starting AddBankAccount flow...")
         val accountNumber = bankAccount.accountNumber
 
         logger.info("Checking for existence of state for $bankAccount.")
@@ -55,7 +52,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
         val signedTransaction = serviceHub.signInitialTransaction(unsignedTransaction)
 
         progressTracker.currentStep = FINALISING
-        return subFlow(FinalityFlow(signedTransaction, FINALISING.childProgressTracker()))
+        return subFlow(FinalityFlow(signedTransaction))
     }
 
 }

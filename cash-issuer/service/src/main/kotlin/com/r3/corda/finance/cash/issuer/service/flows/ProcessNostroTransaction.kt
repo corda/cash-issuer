@@ -1,12 +1,16 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
+import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NoAccountNumber
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByAccountNumber
+import com.r3.corda.finance.cash.issuer.service.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
+import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.FinalityFlow
@@ -15,6 +19,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import java.time.Instant
 
 // TODO: What about segregation of duties? Typically, something like an issuance event would require multiple sign-offs.
 // Perhaps this can be done for transactions over a certain value.
@@ -36,6 +41,34 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         val command = Command(NostroTransactionContract.Match(), listOf(ourIdentity.owningKey))
         val nostroTransactionOutput = stateAndRef.state.data.copy(type = newType, status = newStatus)
         builder.addInputState(stateAndRef).addCommand(command).addOutputState(nostroTransactionOutput, NostroTransactionContract.CONTRACT_ID)
+    }
+
+    private fun addNodeTransactionState(
+            builder: TransactionBuilder,
+            bankAccountStates: List<StateAndRef<BankAccountState>>,
+            nostroTransactionState: NostroTransactionState
+    ) {
+        // The original issuance details.
+        val counterparty = bankAccountStates.single { it.state.data.owner != ourIdentity }.state.data.owner
+        val issuanceAmount = nostroTransactionState.amountTransfer
+        // A record of the issuance for the issuer. We store this separately to the nostro transaction states as these
+        // records pertain to issuance and redemption of cash states as opposed to payments in and out of the nostro
+        // accounts. Currently this state is committed to the ledger separately to the cash issuance. Ideally we want to
+        // commit them atomically.
+        val nodeTransactionState = NodeTransactionState(
+                amountTransfer = AmountTransfer(
+                        quantityDelta = issuanceAmount.quantityDelta,
+                        token = issuanceAmount.token,
+                        source = ourIdentity,       // Never null!
+                        destination = counterparty
+                ),
+                createdAt = Instant.now(),
+                participants = listOf(ourIdentity)
+        )
+
+        // TODO: Add node transaction contract code to check info.
+        builder.addOutputState(nodeTransactionState, NodeTransactionContract.CONTRACT_ID)
+                .addCommand(NodeTransactionContract.Create(), listOf(ourIdentity.owningKey))
     }
 
     @Suspendable
@@ -104,6 +137,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
             }
             isIssuance -> {
                 createBaseTransaction(builder, NostroTransactionType.ISSUANCE, NostroTransactionStatus.MATCHED)
+                addNodeTransactionState(builder, bankAccountStateRefs, nostroTransaction)
                 // TODO: Check that accounts are verified.
                 logger.info("This is an issuance!")
             }

@@ -13,6 +13,7 @@ class NodeTransactionContract : Contract {
 
     interface Commands : CommandData
     class Create : Commands
+    class Update : Commands
 
     override fun verify(tx: LedgerTransaction) {
 

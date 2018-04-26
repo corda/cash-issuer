@@ -13,6 +13,7 @@ import net.corda.core.transactions.SignedTransaction
 class ReceiveBankAccount(val otherSession: FlowSession) : FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
+        logger.info("Starting ReceiveBankAccount flow...")
         return subFlow(ReceiveTransactionFlow(otherSession, true, StatesToRecord.ALL_VISIBLE))
     }
 }

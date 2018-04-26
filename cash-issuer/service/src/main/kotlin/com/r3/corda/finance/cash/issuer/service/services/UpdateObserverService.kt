@@ -6,10 +6,7 @@ import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
-import com.r3.corda.finance.cash.issuer.service.flows.IssueCash
-import com.r3.corda.finance.cash.issuer.service.flows.ProcessNostroTransaction
-import com.r3.corda.finance.cash.issuer.service.flows.ReProcessNostroTransaction
-import com.r3.corda.finance.cash.issuer.service.flows.VerifyBankAccount
+import com.r3.corda.finance.cash.issuer.service.flows.*
 import net.corda.core.contracts.CommandData
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
@@ -76,6 +73,7 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
             val transaction = signedTransaction.tx
             val accountNumber = transaction.outRefsOfType<BankAccountState>().single().state.data.accountNumber
             services.startFlow(VerifyBankAccount(accountNumber))
+            // TODO We probably need to reprocess here as well...
         } else {
             logger.info("We've received an account from another node.")
             services.startFlow(ReProcessNostroTransaction(bankAccountState))
@@ -98,11 +96,18 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
         // Check whether the conditions for issuance are satisfied.
         val isMatched = nostroTransactionState.status == NostroTransactionStatus.MATCHED
         val isIssuance = nostroTransactionState.type == NostroTransactionType.ISSUANCE
-        logger.info("isMatched=$isMatched,isIssuance=$isIssuance")
+        val isRedemption = nostroTransactionState.type == NostroTransactionType.REDEMPTION
+        logger.info("isMatched=$isMatched,isIssuance=$isIssuance,isRedemption=$isRedemption")
         // Start the issue cash flow.
-        if (isMatched && isIssuance) {
-            logger.info("Issuing cash!")
-            services.startFlow(IssueCash(signedTransaction))
+        when {
+            isMatched && isIssuance -> {
+                logger.info("Issuing cash!")
+                services.startFlow(IssueCash(signedTransaction))
+            }
+            isMatched && isRedemption -> {
+                logger.info("Processing redemption payment...")
+                services.startFlow(ProcessRedemptionPayment(signedTransaction))
+            }
         }
     }
 

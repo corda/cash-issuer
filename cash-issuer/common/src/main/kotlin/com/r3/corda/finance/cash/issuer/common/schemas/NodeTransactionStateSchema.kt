@@ -1,4 +1,4 @@
-package com.r3.corda.finance.cash.issuer.service.schemas
+package com.r3.corda.finance.cash.issuer.common.schemas
 
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
@@ -15,7 +15,7 @@ object NodeTransactionStateSchemaV1 : MappedSchema(
 ) {
 
     @Entity
-    @Table(name = "bank_accounts")
+    @Table(name = "node_transaction_states")
     class PersistentNodeTransactionState(
             @Column(name = "issuer")
             var issuer: String,
@@ -29,6 +29,8 @@ object NodeTransactionStateSchemaV1 : MappedSchema(
             var createdAt: Long,
             @Column(name = "type")
             var type: String,
+            @Column(name = "status")
+            var status: String,
             @Column(name = "linear_id")
             var linearId: String
     ) : PersistentState() {
@@ -40,6 +42,7 @@ object NodeTransactionStateSchemaV1 : MappedSchema(
                 currency = "",
                 createdAt = 0L,
                 type = "",
+                status = "",
                 linearId = ""
         )
     }
