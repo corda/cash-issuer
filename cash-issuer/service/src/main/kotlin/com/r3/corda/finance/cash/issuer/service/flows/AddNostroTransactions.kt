@@ -1,11 +1,11 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.finance.cash.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
 import com.r3.corda.finance.cash.issuer.common.types.toState
 import com.r3.corda.finance.cash.issuer.common.utilities.getNostroTransactionStateByTransactionId
-import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic

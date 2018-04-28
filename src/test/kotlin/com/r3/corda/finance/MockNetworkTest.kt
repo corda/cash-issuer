@@ -43,7 +43,7 @@ abstract class MockNetworkTest(private val numberOfNodes: Int = 2) {
         return (1..numberOfNodes).map { current ->
             val char = current.toChar() + 64
             val name = CordaX500Name("Party$char", "London", "GB")
-            network.createPartyNode(name)
+            network.createNode(legalName = name, cordappPackagesToExclude = listOf("com.r3.corda.finance.cash.issuer.service"))
         }
     }
 

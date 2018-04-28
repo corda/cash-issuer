@@ -1,9 +1,9 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
-import com.r3.corda.finance.cash.issuer.service.contracts.NodeTransactionContract
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic

@@ -5,9 +5,11 @@ import com.r3.corda.finance.cash.issuer.common.flows.AbstractRedeemCash
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.flows.SendStateAndRefFlow
+import net.corda.core.flows.SignTransactionFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService
 import net.corda.core.identity.Party
+import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.ProgressTracker
@@ -40,5 +42,9 @@ class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRede
         progressTracker.currentStep = REDEEMING
         subFlow(SendStateAndRefFlow(session, exitStates))
         session.send(amount.issuedBy(PartyAndReference(issuer, OpaqueBytes.of(0))))
+
+        subFlow(object : SignTransactionFlow(session) {
+            override fun checkTransaction(stx: SignedTransaction) = Unit
+        })
     }
 }

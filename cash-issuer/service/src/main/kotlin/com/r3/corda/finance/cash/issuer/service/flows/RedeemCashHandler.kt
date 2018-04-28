@@ -1,9 +1,10 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.common.flows.AbstractRedeemCash
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
-import com.r3.corda.finance.cash.issuer.service.contracts.NodeTransactionContract
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.InsufficientBalanceException
@@ -44,13 +45,14 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         }
         val nodeTransactionState = NodeTransactionState(
                 amountTransfer = AmountTransfer(
-                        quantityDelta = amount.quantity,
+                        quantityDelta = redemptionAmount.quantity,
                         token = amount.token.product,
-                        source = otherSession.counterparty,
-                        destination = ourIdentity
+                        source = ourIdentity,
+                        destination = otherSession.counterparty
                 ),
                 createdAt = Instant.now(),
-                participants = listOf(ourIdentity)
+                participants = listOf(ourIdentity),
+                type = NodeTransactionType.REDEMPTION
         )
         val ledgerTx = transactionBuilder.toLedgerTransaction(serviceHub)
         ledgerTx.inputStates.forEach { logger.info((it as Cash.State).toString()) }

@@ -86,6 +86,7 @@ dependencies {
     cordapp "$corda_release_group:corda-finance:$corda_release_version"
     cordapp project(":cash:kernel")
     cordapp project(":cash-issuer:common")
+    cordapp project(":cash-issuer:daemon")
     cordapp project(":cash-issuer:client")
     cordapp project(":cash-issuer:service")
 }

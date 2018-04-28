@@ -4,6 +4,7 @@ import com.r3.corda.finance.cash.issuer.common.schemas.BankAccountStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.schemas.NodeTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
+import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
 import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
@@ -42,10 +43,10 @@ fun getNostroTransactionStateByTransactionId(transactionId: String, services: Se
     return states.singleOrNull()
 }
 
-fun getPendingRedemptionsByCounterparty(counterparty: String, services: ServiceHub): List<StateAndRef<NostroTransactionState>>? {
+fun getPendingRedemptionsByCounterparty(counterparty: String, services: ServiceHub): List<StateAndRef<NodeTransactionState>>? {
     return getState(services) { generalCriteria ->
-        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::status.equal(NodeTransactionStatus.PENDING))
-        val additionalCriteriaTwo = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::type.equal(NodeTransactionType.REDEMPTION))
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::status.equal(NodeTransactionStatus.PENDING.name))
+        val additionalCriteriaTwo = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::type.equal(NodeTransactionType.REDEMPTION.name))
         val additionalCriteriaThree = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::counterparty.equal(counterparty))
         generalCriteria.and(additionalCriteria.and(additionalCriteriaTwo.and(additionalCriteriaThree)))
     }

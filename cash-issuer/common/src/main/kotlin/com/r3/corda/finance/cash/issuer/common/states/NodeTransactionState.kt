@@ -18,7 +18,7 @@ data class NodeTransactionState(
         val amountTransfer: AmountTransfer<Currency, Party>,
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
-        val type: NodeTransactionType = if (amountTransfer.quantityDelta > 0) NodeTransactionType.ISSUANCE else NodeTransactionType.REDEMPTION,
+        val type: NodeTransactionType,
         val status: NodeTransactionStatus = NodeTransactionStatus.PENDING,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState, QueryableState {

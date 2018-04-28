@@ -2,26 +2,33 @@ package com.r3.corda.finance
 
 import com.r3.corda.finance.cash.issuer.client.flows.RedeemCash
 import com.r3.corda.finance.cash.issuer.client.flows.SendBankAccount
+import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccount
 import com.r3.corda.finance.cash.issuer.common.flows.MoveCash
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.types.BankAccount
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
 import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
+import com.r3.corda.finance.cash.issuer.daemon.mock.GenerationScheme
+import com.r3.corda.finance.cash.issuer.daemon.mock.generateRandomString
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.finance.cash.issuer.service.flows.IssueCashInternal
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.contracts.withoutIssuer
 import net.corda.core.crypto.toStringShort
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.finance.GBP
+import net.corda.finance.POUNDS
+import net.corda.finance.contracts.asset.Cash
 import net.corda.testing.node.StartedMockNode
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.util.*
+import kotlin.test.assertEquals
 
 class IssueMoveAndRedeemCash : MockNetworkTest(numberOfNodes = 2) {
 
@@ -40,9 +47,9 @@ class IssueMoveAndRedeemCash : MockNetworkTest(numberOfNodes = 2) {
         return this.info.legalIdentities.first()
     }
 
-    private fun StartedMockNode.createNostroTransaction(amount: Long, description: String, from: String) {
+    private fun StartedMockNode.createNostroTransaction(amount: Long, description: String, from: String = "11111122224444", to: String = "11111122224444") {
         val nTx = NostroTransaction(
-                transactionId = "abc",
+                transactionId = generateRandomString(24, GenerationScheme.LETTERS_AND_NUMBERS),
                 accountId = identity().owningKey.toStringShort(), // one account for now.
                 amount = amount,
                 currency = GBP,
@@ -50,9 +57,9 @@ class IssueMoveAndRedeemCash : MockNetworkTest(numberOfNodes = 2) {
                 description = "",
                 createdAt = Instant.now(),
                 source = UKAccountNumber(from),
-                destination = UKAccountNumber("11111122224444")
+                destination = UKAccountNumber(to)
         )
-        startFlow(AddNostroTransactions(listOf(nTx))).getOrThrow()
+        startFlow(AddNostroTransactions(listOf(nTx)))
     }
 
     private fun issueCash(to: Party, amount: Amount<Currency>): SignedTransaction {
@@ -90,17 +97,15 @@ class IssueMoveAndRedeemCash : MockNetworkTest(numberOfNodes = 2) {
         B.sendBankAccount(I.identity(), bBankAccountId)
         // Wait for all the bank account stuff to finish...
         network.waitQuiescent()
-        I.createNostroTransaction(50L, "Test transaction", "12345612345678")
-//        issueCash(A.identity(), 50.POUNDS)
-//        issueCash(A.identity(), 1.POUNDS)
-//        issueCash(A.identity(), 1.POUNDS)
-//        issueCash(A.identity(), 1.POUNDS)
-//        issueCash(A.identity(), 10.POUNDS)
-//        A.moveCash(B.identity(), 40.POUNDS)
-//        B.redeemCash(I.identity(), 20.POUNDS)
-        // val nTx = NostroTransactionState()
-        A.services.validatedTransactions.updates.toBlocking().subscribe {
-            println(it)
-        }
+        I.createNostroTransaction(5000L, "Test transaction", from = "12345612345678")
+        val issueCash = A.services.validatedTransactions.updates.toBlocking().first()
+        println(issueCash.tx)
+        assertEquals(Amount(5000L, GBP), issueCash.tx.outputsOfType<Cash.State>().single().amount.withoutIssuer())
+        A.moveCash(B.identity(), 40.POUNDS)
+        B.redeemCash(I.identity(), 20.POUNDS)
+        val redeemCash = I.services.validatedTransactions.updates.toBlocking().first()
+        println(redeemCash.tx)
+        I.createNostroTransaction(-2000L, "Test transaction", to = "24681012141618")
+        I.services.validatedTransactions.updates.toBlocking().first { it.tx.commands.single().value is NodeTransactionContract.Update }
     }
 }

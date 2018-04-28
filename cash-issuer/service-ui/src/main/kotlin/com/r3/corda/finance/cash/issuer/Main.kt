@@ -9,10 +9,13 @@ import javafx.application.Application
 import javafx.beans.property.SimpleLongProperty
 import javafx.collections.ObservableList
 import net.corda.client.jfx.utils.map
+import net.corda.client.jfx.utils.observeOnFXThread
 import net.corda.client.jfx.utils.toFXListOfStates
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.filterStatesOfType
 import net.corda.core.identity.Party
+import net.corda.core.internal.toMultiMap
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.vaultTrackBy
 import net.corda.core.utilities.NetworkHostAndPort
@@ -70,13 +73,39 @@ class BankAccountView : View("Cash Issuer") {
     val bankAccountFeed = cordaRPCOps.vaultTrackBy<BankAccountState>().toFXListOfStates().transform { it.toUiModel() }
     val nostroTransactionFeed = cordaRPCOps.vaultTrackBy<NostroTransactionState>().toFXListOfStates()
 
-    val totalBalance = SimpleLongProperty(nostroTransactionFeed.map { it.amountTransfer.quantityDelta }.sum()).asObject()
+    init {
+        // TODO: Set all values from this loop. Update the nostro transaction table etc.
+        cordaRPCOps.vaultTrackBy<NostroTransactionState>().updates.observeOnFXThread().subscribe {
+            val current = totalBalance.value
+            val consumed = it.consumed.filterStatesOfType<NostroTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
+            val produced = it.produced.filterStatesOfType<NostroTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
+            val new = current - consumed + produced
+            totalBalance.set(new)
+        }
+    }
+
+    val totalBalance = SimpleLongProperty(cordaRPCOps.vaultTrackBy<NostroTransactionState>().snapshot.states.map {
+        it.state.data.amountTransfer.quantityDelta
+    }.sum())
+
+    val balancePerAccount = cordaRPCOps.vaultTrackBy<NostroTransactionState>().snapshot.states.map {
+        it.state.data.accountId to it.state.data.amountTransfer.quantityDelta
+    }.toMultiMap().mapValues { it.value.sum() }
 
     override val root = tabpane {
         tab("Information") {
-            label("Total bank balance")
-            label {
-                bind(totalBalance)
+            vbox {
+                hbox {
+                    label {
+                        text = "Total bank balance: GBP "
+                    }
+                    label {
+                        bind(totalBalance / 100L)
+                    }
+                }
+                // list of account balances.
+                // list of amount currently issued.
+                // how much the account is over collateralised.
             }
         }
         tab("Bank accounts") {
@@ -149,6 +178,9 @@ class BankAccountView : View("Cash Issuer") {
                 readonlyColumn("Status", NostroTransactionState::status)
                 readonlyColumn("Type", NostroTransactionState::type)
             }
+        }
+        tab("Node transactions") {
+            // List of node transactions with their status. It's a read only table.
         }
     }
 

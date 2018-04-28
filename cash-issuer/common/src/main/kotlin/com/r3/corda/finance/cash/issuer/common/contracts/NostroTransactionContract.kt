@@ -1,4 +1,4 @@
-package com.r3.corda.finance.cash.issuer.service.contracts
+package com.r3.corda.finance.cash.issuer.common.contracts
 
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
@@ -8,7 +8,7 @@ class NostroTransactionContract : Contract {
 
     companion object {
         @JvmStatic
-        val CONTRACT_ID = "com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract"
+        val CONTRACT_ID = "com.r3.corda.finance.cash.issuer.common.contracts.NostroTransactionContract"
     }
 
     interface Commands : CommandData

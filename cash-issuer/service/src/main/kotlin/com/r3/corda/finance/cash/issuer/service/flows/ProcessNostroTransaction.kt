@@ -1,15 +1,16 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
+import com.r3.corda.finance.cash.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NoAccountNumber
+import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByAccountNumber
-import com.r3.corda.finance.cash.issuer.service.contracts.NodeTransactionContract
-import com.r3.corda.finance.cash.issuer.service.contracts.NostroTransactionContract
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
@@ -40,7 +41,10 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
     private fun createBaseTransaction(builder: TransactionBuilder, newType: NostroTransactionType, newStatus: NostroTransactionStatus) {
         val command = Command(NostroTransactionContract.Match(), listOf(ourIdentity.owningKey))
         val nostroTransactionOutput = stateAndRef.state.data.copy(type = newType, status = newStatus)
-        builder.addInputState(stateAndRef).addCommand(command).addOutputState(nostroTransactionOutput, NostroTransactionContract.CONTRACT_ID)
+        builder
+                .addInputState(stateAndRef)
+                .addCommand(command)
+                .addOutputState(nostroTransactionOutput, NostroTransactionContract.CONTRACT_ID)
     }
 
     private fun addNodeTransactionState(
@@ -63,7 +67,8 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
                         destination = counterparty
                 ),
                 createdAt = Instant.now(),
-                participants = listOf(ourIdentity)
+                participants = listOf(ourIdentity),
+                type = NodeTransactionType.ISSUANCE
         )
 
         // TODO: Add node transaction contract code to check info.

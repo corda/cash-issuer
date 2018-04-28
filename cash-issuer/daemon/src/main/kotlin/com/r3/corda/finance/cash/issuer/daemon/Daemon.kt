@@ -56,6 +56,8 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
         if (cmdLineOptions.autoMode) {
             start()
         }
+
+//        listenForTxUpdates()
     }
 
     fun start() {
@@ -165,4 +167,17 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
             println("\t* The node has no nostro transactions stored.")
         }
     }
+
+//    // TODO: This needs moving into the Starling module.
+//    // It should watch for updates for backaccounts which move them from unverified to verified.
+//    private fun listenForTxUpdates() {
+//        services.vaultTrack(BankAccountState::class.java).updates.observeOn(Schedulers.io()).subscribe { bankAccountState ->
+//            // TODO this will throw for newly added back accounts. Fix it.
+//            val before = bankAccountState.consumed.single().state.data
+//            val after = bankAccountState.produced.single().state.data
+//            if (!before.verified && after.verified) {
+//                println("A bank account state has been been verified. We need to add it to the Starling counterparties.")
+//            }
+//        }
+//    }
 }
