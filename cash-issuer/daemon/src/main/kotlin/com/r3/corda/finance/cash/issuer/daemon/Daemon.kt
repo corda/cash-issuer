@@ -152,19 +152,34 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
         // The daemon doesn't persist any data across restarts, so it must query the node to ascertain
         // the timestamps of the last recorded nostro transaction information. This is so the daemon
         // doesn't miss any transactions when it starts up after some downtime.
-        println("\nQuerying Issuer node for last recorded transactions per nostro account...\n")
+        if (cmdLineOptions.startFrom != null) {
+            println("\nWill use \"start-from\" time if it is greater than the node's last timestamps...\n")
+        } else {
+            println("\nQuerying Issuer node for last recorded transactions per nostro account...\n")
+        }
         val lastUpdatesByAccountId = services.startFlowDynamic(GetLastUpdatesByAccountId::class.java).returnValue.getOrThrow()
         if (lastUpdatesByAccountId.isNotEmpty()) {
             println("\tAccount ID\t\t\t\tTimestamp")
             println("\t----------\t\t\t\t---------")
             lastUpdatesByAccountId.forEach { (accountId, timestamp) ->
-                println("\t${accountId.truncate()}\t\t$timestamp")
-                accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp)
+                // Use the start from timestamp if it was specified in the options and greater than the timestamps
+                // of the last stored transactions in the node.
+                val lastUpdate = cmdLineOptions.startFrom?.let {
+                    if (it.toEpochMilli() > timestamp) it.toEpochMilli() else timestamp
+                } ?: timestamp
+                println("\t${accountId.truncate()}\t\t$lastUpdate")
+                accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, lastUpdate)
                         ?: throw IllegalStateException("Issuer node has a last recorded transaction for $accountId. " +
                                 "However, there is no corresponding bank API client!")
             }
         } else {
             println("\t* The node has no nostro transactions stored.")
+            if (cmdLineOptions.startFrom != null) {
+                println("\t* ... but we will use the \"start-from\" timestamp.")
+                accountsToBank.forEach { t, _ ->
+                    accountsToBank[t]!!.updateLastTransactionTimestamps(t, cmdLineOptions.startFrom.toEpochMilli())
+                }
+            }
         }
     }
 

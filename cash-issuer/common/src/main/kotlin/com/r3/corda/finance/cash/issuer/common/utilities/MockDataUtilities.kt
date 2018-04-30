@@ -1,4 +1,4 @@
-package com.r3.corda.finance.cash.issuer.daemon.mock
+package com.r3.corda.finance.cash.issuer.common.utilities
 
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction

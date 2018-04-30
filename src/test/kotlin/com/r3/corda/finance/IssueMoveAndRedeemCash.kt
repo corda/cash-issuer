@@ -9,8 +9,8 @@ import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.types.BankAccount
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
 import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
-import com.r3.corda.finance.cash.issuer.daemon.mock.GenerationScheme
-import com.r3.corda.finance.cash.issuer.daemon.mock.generateRandomString
+import com.r3.corda.finance.cash.issuer.common.utilities.GenerationScheme
+import com.r3.corda.finance.cash.issuer.common.utilities.generateRandomString
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.finance.cash.issuer.service.flows.IssueCashInternal
 import net.corda.core.contracts.Amount

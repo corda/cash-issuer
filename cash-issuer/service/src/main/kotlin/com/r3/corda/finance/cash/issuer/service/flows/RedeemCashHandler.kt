@@ -5,6 +5,8 @@ import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.common.flows.AbstractRedeemCash
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
+import com.r3.corda.finance.cash.issuer.common.utilities.GenerationScheme
+import com.r3.corda.finance.cash.issuer.common.utilities.generateRandomString
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.InsufficientBalanceException
@@ -27,12 +29,10 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         val cashStateAndRefsToRedeem = subFlow(ReceiveStateAndRefFlow<Cash.State>(otherSession))
         val redemptionAmount = otherSession.receive<Amount<Issued<Currency>>>().unwrap { it }
         logger.info("Received cash states to redeem.")
-        // TODO: produce redeem transaction adding the stateRefs as inputs
         // Add create a node transaction state by adding the linearIds of all teh bank account states
         val amount = cashStateAndRefsToRedeem.map { it.state.data }.sumCash()
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val transactionBuilder = TransactionBuilder(notary = notary)
-        // TODO: redeeming doesnt currently work. Fix it.
         val signers = try {
             Cash().generateExit(
                     tx = transactionBuilder,
@@ -45,11 +45,12 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         }
         val nodeTransactionState = NodeTransactionState(
                 amountTransfer = AmountTransfer(
-                        quantityDelta = redemptionAmount.quantity,
+                        quantityDelta = -redemptionAmount.quantity,
                         token = amount.token.product,
                         source = ourIdentity,
                         destination = otherSession.counterparty
                 ),
+                notes = generateRandomString(10, GenerationScheme.NUMBERS),
                 createdAt = Instant.now(),
                 participants = listOf(ourIdentity),
                 type = NodeTransactionType.REDEMPTION

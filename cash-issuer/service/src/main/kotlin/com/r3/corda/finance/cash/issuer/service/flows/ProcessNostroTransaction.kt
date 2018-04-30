@@ -11,6 +11,7 @@ import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByAccountNumber
+import com.r3.corda.finance.cash.issuer.common.utilities.getPendingRedemptionByNotes
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
@@ -50,7 +51,8 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
     private fun addNodeTransactionState(
             builder: TransactionBuilder,
             bankAccountStates: List<StateAndRef<BankAccountState>>,
-            nostroTransactionState: NostroTransactionState
+            nostroTransactionState: NostroTransactionState,
+            isRedemption: Boolean = false
     ) {
         // The original issuance details.
         val counterparty = bankAccountStates.single { it.state.data.owner != ourIdentity }.state.data.owner
@@ -59,16 +61,20 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         // records pertain to issuance and redemption of cash states as opposed to payments in and out of the nostro
         // accounts. Currently this state is committed to the ledger separately to the cash issuance. Ideally we want to
         // commit them atomically.
+        // TODO: This is a hack which needs removing.
+        // Node transaction states for redemptions are only added by the redeem cash handler. So.. if we remove some
+        // data from the node (accidentally perhaps) then when the node processes the nostro transactions
         val nodeTransactionState = NodeTransactionState(
                 amountTransfer = AmountTransfer(
                         quantityDelta = issuanceAmount.quantityDelta,
                         token = issuanceAmount.token,
-                        source = ourIdentity,       // Never null!
-                        destination = counterparty
+                        source = if (isRedemption) counterparty else ourIdentity,
+                        destination = if (isRedemption) ourIdentity else counterparty
                 ),
+                notes = nostroTransactionState.description,
                 createdAt = Instant.now(),
                 participants = listOf(ourIdentity),
-                type = NodeTransactionType.ISSUANCE
+                type = if (isRedemption) NodeTransactionType.REDEMPTION else NodeTransactionType.ISSUANCE
         )
 
         // TODO: Add node transaction contract code to check info.
@@ -142,12 +148,20 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
             }
             isIssuance -> {
                 createBaseTransaction(builder, NostroTransactionType.ISSUANCE, NostroTransactionStatus.MATCHED)
-                addNodeTransactionState(builder, bankAccountStateRefs, nostroTransaction)
+                addNodeTransactionState(builder, bankAccountStateRefs, nostroTransaction, isRedemption)
                 // TODO: Check that accounts are verified.
                 logger.info("This is an issuance!")
             }
             isRedemption -> {
                 createBaseTransaction(builder, NostroTransactionType.REDEMPTION, NostroTransactionStatus.MATCHED)
+                // TODO: Hack alert!!! (Need to do some more thinking around this re: "start from date").
+                // Need to work out how we deal with backup restores or processing nostro transactinos which have
+                // already been processed after a database backup restore. Currently, I'm just re-creating the pending
+                // node transaction state here as the assumption is that node transaction states always precede
+                // nostro transaction states for redemptions.
+                if (getPendingRedemptionByNotes(nostroTransaction.description, serviceHub) == null) {
+                    addNodeTransactionState(builder, bankAccountStateRefs, nostroTransaction, isRedemption)
+                }
                 logger.info("This is an redemption!")
             }
             else -> throw FlowException("Something went wrong. Someone is going to be in trouble...!")

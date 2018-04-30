@@ -1,12 +1,12 @@
 package com.r3.corda.finance.cash.issuer
 
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
+import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
-import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
-import com.r3.corda.finance.cash.issuer.common.types.BankAccountType
-import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
+import com.r3.corda.finance.cash.issuer.common.types.*
 import javafx.application.Application
 import javafx.beans.property.SimpleLongProperty
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import net.corda.client.jfx.utils.map
 import net.corda.client.jfx.utils.observeOnFXThread
@@ -15,7 +15,6 @@ import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.filterStatesOfType
 import net.corda.core.identity.Party
-import net.corda.core.internal.toMultiMap
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.vaultTrackBy
 import net.corda.core.utilities.NetworkHostAndPort
@@ -46,8 +45,83 @@ class BankAccountUiModel(
     fun verifiedProperty() = getProperty(BankAccountUiModel::verified)
 }
 
+class NostroTransactionUiModel(
+        internalTransactionId: UUID,
+        accountId: String,
+        amount: Long,
+        currency: Currency,
+        source: AccountNumber,
+        destination: AccountNumber,
+        createdAt: Instant,
+        status: NostroTransactionStatus,
+        type: NostroTransactionType,
+        lastUpdated: Instant
+) {
+    val internalTransactionId by property(internalTransactionId)
+    val accountId by property(accountId)
+    val amount by property(amount)
+    val currency by property(currency)
+    val source by property(source)
+    val destination by property(destination)
+    val createdAt by property(createdAt)
+    val status by property(status)
+    val type by property(type)
+    val lastUpdated by property(lastUpdated)
+}
+
+class NodeTransactionUiModel(
+        transactionId: UUID,
+        amount: Long,
+        currency: Currency,
+        source: Party,
+        notes: String,
+        destination: Party,
+        createdAt: Instant,
+        status: NodeTransactionStatus,
+        type: NodeTransactionType
+) {
+    val transactionId by property(transactionId)
+    val amount by property(amount)
+    val currency by property(currency)
+    val source by property(source)
+    val notes by property(notes)
+    val destination by property(destination)
+    val createdAt by property(createdAt)
+    val status by property(status)
+    val type by property(type)
+}
+
+fun NodeTransactionState.toUiModel(): NodeTransactionUiModel {
+    return NodeTransactionUiModel(
+            linearId.id,
+            amountTransfer.quantityDelta,
+            amountTransfer.token,
+            amountTransfer.source,
+            notes,
+            amountTransfer.destination,
+            createdAt,
+            status,
+            type
+    )
+}
+
 fun BankAccountState.toUiModel(): BankAccountUiModel {
     return BankAccountUiModel(owner, linearId.id, linearId.externalId!!, accountName, accountNumber, currency, type, verified, lastUpdated)
+}
+
+fun NostroTransactionState.toUiModel(): NostroTransactionUiModel {
+    return NostroTransactionUiModel(
+            linearId.id,
+            accountId,
+            amountTransfer.quantityDelta,
+            amountTransfer.token,
+            amountTransfer.source,
+            amountTransfer.destination,
+            createdAt,
+            status,
+            type,
+            lastUpdated
+    )
 }
 
 fun <T : ContractState, U : Any> ObservableList<T>.transform(block: (T) -> U) = map { block(it) }
@@ -71,36 +145,76 @@ fun main(args: Array<String>) {
 class BankAccountView : View("Cash Issuer") {
 
     val bankAccountFeed = cordaRPCOps.vaultTrackBy<BankAccountState>().toFXListOfStates().transform { it.toUiModel() }
-    val nostroTransactionFeed = cordaRPCOps.vaultTrackBy<NostroTransactionState>().toFXListOfStates()
+    val _nostroTransactionsFeed = cordaRPCOps.vaultTrackBy<NostroTransactionState>()
+    val _nodeTransactionsFeed = cordaRPCOps.vaultTrackBy<NodeTransactionState>()
+
+    val nostroTransactions = FXCollections.observableArrayList(_nostroTransactionsFeed.snapshot.states.filterStatesOfType<NostroTransactionState>())
+    val nodeTransactions = FXCollections.observableArrayList(_nodeTransactionsFeed.snapshot.states.filterStatesOfType<NodeTransactionState>())
 
     init {
         // TODO: Set all values from this loop. Update the nostro transaction table etc.
-        cordaRPCOps.vaultTrackBy<NostroTransactionState>().updates.observeOnFXThread().subscribe {
-            val current = totalBalance.value
+        _nostroTransactionsFeed.updates.observeOnFXThread().subscribe {
+            // Update the nostro transactions list.
+            nostroTransactions.removeAll(it.consumed.filterStatesOfType<NostroTransactionState>())
+            nostroTransactions.addAll(it.produced.filterStatesOfType<NostroTransactionState>())
+
+            // Update balance.
+            val current = totalBankBalance.value
             val consumed = it.consumed.filterStatesOfType<NostroTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
             val produced = it.produced.filterStatesOfType<NostroTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
             val new = current - consumed + produced
-            totalBalance.set(new)
+            totalBankBalance.set(new)
+        }
+
+        _nodeTransactionsFeed.updates.observeOnFXThread().subscribe {
+            // Update node transactions list.
+            nodeTransactions.removeAll(it.consumed.filterStatesOfType<NodeTransactionState>())
+            nodeTransactions.addAll(it.produced.filterStatesOfType<NodeTransactionState>())
+
+            // Update total amount issued.
+            val current = totalIssued.value
+            val consumed = it.consumed.filterStatesOfType<NodeTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
+            val produced = it.produced.filterStatesOfType<NodeTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum()
+            val new = current - consumed + produced
+            totalIssued.set(new)
         }
     }
 
-    val totalBalance = SimpleLongProperty(cordaRPCOps.vaultTrackBy<NostroTransactionState>().snapshot.states.map {
-        it.state.data.amountTransfer.quantityDelta
-    }.sum())
-
-    val balancePerAccount = cordaRPCOps.vaultTrackBy<NostroTransactionState>().snapshot.states.map {
-        it.state.data.accountId to it.state.data.amountTransfer.quantityDelta
-    }.toMultiMap().mapValues { it.value.sum() }
+    val totalBankBalance = SimpleLongProperty(_nostroTransactionsFeed.snapshot.states.filterStatesOfType<NostroTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum())
+    val totalIssued = SimpleLongProperty(_nodeTransactionsFeed.snapshot.states.filterStatesOfType<NodeTransactionState>().map { it.state.data.amountTransfer.quantityDelta }.sum())
 
     override val root = tabpane {
+        style {
+            fontSize = 10.px
+        }
         tab("Information") {
             vbox {
                 hbox {
                     label {
-                        text = "Total bank balance: GBP "
+                        style {
+                            fontSize = 24.px
+                        }
+                        text = "Total bank balances: GBP "
                     }
                     label {
-                        bind(totalBalance / 100L)
+                        style {
+                            fontSize = 24.px
+                        }
+                        bind(totalBankBalance / 100)
+                    }
+                }
+                hbox {
+                    label {
+                        style {
+                            fontSize = 24.px
+                        }
+                        text = "Total amount issued: GBP "
+                    }
+                    label {
+                        style {
+                            fontSize = 24.px
+                        }
+                        bind(totalIssued / 100)
                     }
                 }
                 // list of account balances.
@@ -144,19 +258,20 @@ class BankAccountView : View("Cash Issuer") {
             }
         }
         tab("Nostro transactions") {
-            tableview<NostroTransactionState> {
-                items = nostroTransactionFeed
+            tableview<NostroTransactionUiModel> {
+                items = nostroTransactions.map { it.state.data }.transform { it.toUiModel() }
                 style {
                     fontSize = 10.px
                 }
                 columnResizePolicy = SmartResize.POLICY
                 makeIndexColumn()
-                readonlyColumn("Linear Id", NostroTransactionState::linearId) { cellFormat { it.id } }
-                readonlyColumn("amount", NostroTransactionState::amountTransfer) { cellFormat { it.quantityDelta } }
-                readonlyColumn("currency", NostroTransactionState::amountTransfer) { cellFormat { it.token } }
-                readonlyColumn("source", NostroTransactionState::amountTransfer) {
+                readonlyColumn("Linear Id", NostroTransactionUiModel::internalTransactionId)
+                readonlyColumn("currency", NostroTransactionUiModel::currency)
+                readonlyColumn("amount", NostroTransactionUiModel::amount)
+                readonlyColumn("account id", NostroTransactionUiModel::accountId)
+                readonlyColumn("source", NostroTransactionUiModel::source) {
                     cellFormat {
-                        val source = it.source
+                        val source = it
                         when (source) {
                             is UKAccountNumber -> {
                                 text = "${source.sortCode} ${source.accountNumber}"
@@ -164,9 +279,9 @@ class BankAccountView : View("Cash Issuer") {
                         }
                     }
                 }
-                readonlyColumn("destination", NostroTransactionState::amountTransfer) {
+                readonlyColumn("destination", NostroTransactionUiModel::destination) {
                     cellFormat {
-                        val destination = it.destination
+                        val destination = it
                         when (destination) {
                             is UKAccountNumber -> {
                                 text = "${destination.sortCode} ${destination.accountNumber}"
@@ -174,13 +289,30 @@ class BankAccountView : View("Cash Issuer") {
                         }
                     }
                 }
-                readonlyColumn("Last updated", NostroTransactionState::lastUpdated)
-                readonlyColumn("Status", NostroTransactionState::status)
-                readonlyColumn("Type", NostroTransactionState::type)
+                readonlyColumn("Created at", NostroTransactionUiModel::createdAt)
+                readonlyColumn("Last updated", NostroTransactionUiModel::lastUpdated)
+                readonlyColumn("Status", NostroTransactionUiModel::status)
+                readonlyColumn("Type", NostroTransactionUiModel::type)
             }
         }
         tab("Node transactions") {
-            // List of node transactions with their status. It's a read only table.
+            tableview<NodeTransactionUiModel> {
+                items = nodeTransactions.map { it.state.data }.transform { it.toUiModel() }
+                style {
+                    fontSize = 10.px
+                }
+                columnResizePolicy = SmartResize.POLICY
+                makeIndexColumn()
+                readonlyColumn("Linear Id", NodeTransactionUiModel::transactionId)
+                readonlyColumn("currency", NodeTransactionUiModel::currency)
+                readonlyColumn("amount", NodeTransactionUiModel::amount)
+                readonlyColumn("notes", NodeTransactionUiModel::notes)
+                readonlyColumn("source", NodeTransactionUiModel::source)
+                readonlyColumn("destination", NodeTransactionUiModel::destination)
+                readonlyColumn("Created at", NodeTransactionUiModel::createdAt)
+                readonlyColumn("Status", NodeTransactionUiModel::status)
+                readonlyColumn("Type", NodeTransactionUiModel::type)
+            }
         }
     }
 

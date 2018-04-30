@@ -52,6 +52,14 @@ fun getPendingRedemptionsByCounterparty(counterparty: String, services: ServiceH
     }
 }
 
+fun getPendingRedemptionByNotes(notes: String, services: ServiceHub): StateAndRef<NodeTransactionState>? {
+    val states = getState<NodeTransactionState>(services) { generalCriteria ->
+        val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(NodeTransactionStateSchemaV1.PersistentNodeTransactionState::notes.equal(notes))
+        generalCriteria.and(additionalCriteria)
+    }
+    return states.singleOrNull()
+}
+
 private inline fun <reified U : ContractState> getState(
         services: ServiceHub,
         block: (generalCriteria: QueryCriteria.VaultQueryCriteria) -> QueryCriteria

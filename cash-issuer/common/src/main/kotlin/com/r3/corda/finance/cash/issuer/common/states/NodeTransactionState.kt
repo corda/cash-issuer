@@ -18,6 +18,7 @@ data class NodeTransactionState(
         val amountTransfer: AmountTransfer<Currency, Party>,
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
+        val notes: String,
         val type: NodeTransactionType,
         val status: NodeTransactionStatus = NodeTransactionStatus.PENDING,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
@@ -29,6 +30,7 @@ data class NodeTransactionState(
                 NodeTransactionStateSchemaV1.PersistentNodeTransactionState(
                         issuer = amountTransfer.source.name.toString(),
                         counterparty = amountTransfer.destination.name.toString(),
+                        notes = notes,
                         amount = amountTransfer.quantityDelta,
                         currency = amountTransfer.token.currencyCode,
                         type = type.name,

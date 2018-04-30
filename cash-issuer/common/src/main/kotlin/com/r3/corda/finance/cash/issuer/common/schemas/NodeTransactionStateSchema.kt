@@ -21,6 +21,8 @@ object NodeTransactionStateSchemaV1 : MappedSchema(
             var issuer: String,
             @Column(name = "counterparty")
             var counterparty: String,
+            @Column(name = "notes")
+            var notes: String,
             @Column(name = "amount")
             var amount: Long,
             @Column(name = "currency")
@@ -38,6 +40,7 @@ object NodeTransactionStateSchemaV1 : MappedSchema(
         constructor() : this(
                 issuer = "",
                 counterparty = "",
+                notes = "",
                 amount = 0L,
                 currency = "",
                 createdAt = 0L,
