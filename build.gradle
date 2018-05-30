@@ -60,10 +60,10 @@ sourceSets {
     }
 }
 
-configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
+//configurations {
+//    integrationTestCompile.extendsFrom testCompile
+//    integrationTestRuntime.extendsFrom testRuntime
+//}
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

@@ -12,4 +12,3 @@ include 'cash:kernel'
 findProject(':cash:kernel')?.name = 'kernel'
 include 'cash-issuer:service-ui'
 findProject(':cash-issuer:service-ui')?.name = 'service-ui'
-
