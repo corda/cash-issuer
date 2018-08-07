@@ -4,9 +4,9 @@
 
 **WARNING: DO NOT USE IN PRODUCTION!**
 
-**WARNING:** To run this code, you need a SNAPSHOT version of Corda that
-implements a prototype of reference input states. This code also only works
-with UK bank accounts that provide open banking APIs.
+**WARNING:** To run this code, you need to use version 4.0-SNAPSHOT of
+Corda or greater. This code also only works with UK bank accounts that
+provide open banking APIs.
 
 This repo contains a reference implementation of the Corda cash issuer as
 described in the [accompanying design document](design/design.md).
