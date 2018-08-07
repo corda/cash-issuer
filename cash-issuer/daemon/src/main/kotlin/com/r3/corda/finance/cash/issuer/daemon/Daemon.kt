@@ -6,6 +6,7 @@ import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.finance.cash.issuer.service.flows.GetLastUpdatesByAccountId
 import com.r3.corda.finance.cash.issuer.service.flows.GetNostroAccountBalances
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
+import net.corda.core.CordaRuntimeException
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.getOrThrow
@@ -113,7 +114,7 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
             try {
                 services.startFlowDynamic(AddBankAccount::class.java, it).returnValue.getOrThrow()
                 println("\t* Added bank account with $accountNumber.")
-            } catch (e: IllegalArgumentException) {
+            } catch (e: CordaRuntimeException) {
                 println("\t* Bank account with $accountNumber has already been added.")
             }
         }

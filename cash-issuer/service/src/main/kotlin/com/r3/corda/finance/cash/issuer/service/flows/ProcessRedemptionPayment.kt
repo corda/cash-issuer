@@ -16,7 +16,7 @@ import net.corda.core.transactions.TransactionBuilder
 class ProcessRedemptionPayment(val signedTransaction: SignedTransaction) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
-        val counterparty = signedTransaction.tx.toLedgerTransaction(serviceHub).refRefsOfType<BankAccountState>().single {
+        val counterparty = signedTransaction.tx.toLedgerTransaction(serviceHub).referenceInputRefsOfType<BankAccountState>().single {
             it.state.data.owner != ourIdentity
         }.state.data.owner
         logger.info("Counterparty to redeem to is $counterparty")

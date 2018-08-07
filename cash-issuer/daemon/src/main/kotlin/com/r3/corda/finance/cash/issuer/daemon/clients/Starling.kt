@@ -62,7 +62,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
     override fun balance(accountId: BankAccountId?): Amount<Currency> {
         val balance = api.balance().getOrThrow()
         // Amounts require cent/pence values.
-        return Amount(balance.amount.longValueExact() * 100, balance.currency)
+        return Amount((balance.amount * 100.toBigDecimal()).longValueExact(), balance.currency)
     }
 
     private fun getDateStringFromInstant(instant: Instant): String {

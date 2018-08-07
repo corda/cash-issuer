@@ -1,8 +1,8 @@
 buildscript {
-    ext.corda_release_group = 'com.r3.corda'
-    ext.corda_release_version = 'R3.CORDA-3.0.0-DEV-PREVIEW-3'
-    ext.corda_gradle_plugins_version = '4.0.11'
-    ext.kotlin_version = '1.2.20'
+    ext.corda_release_group = 'net.corda'
+    ext.corda_release_version = '4.0-SNAPSHOT'
+    ext.corda_gradle_plugins_version = '4.0.28'
+    ext.kotlin_version = '1.2.51'
     ext.junit_version = '4.12'
     ext.quasar_group = 'com.github.corda.quasar'
     ext.quasar_version = '7629695563deae6cc95adcfbebcbc8322fd0241a'
@@ -16,6 +16,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         jcenter()
+        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
     }
 
     dependencies {
