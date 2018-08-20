@@ -1,13 +1,16 @@
 package com.r3.corda.finance.cash.issuer
 
+import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccount
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
 import com.r3.corda.finance.cash.issuer.common.types.*
 import javafx.application.Application
 import javafx.beans.property.SimpleLongProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.stage.StageStyle
 import net.corda.client.jfx.utils.map
 import net.corda.client.jfx.utils.observeOnFXThread
 import net.corda.client.jfx.utils.toFXListOfStates
@@ -16,6 +19,7 @@ import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.filterStatesOfType
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.startFlow
 import net.corda.core.messaging.vaultTrackBy
 import net.corda.core.utilities.NetworkHostAndPort
 import tornadofx.*
@@ -251,7 +255,7 @@ class BankAccountView : View("Cash Issuer") {
                     toolbar {
                         // Click to add an update to the first entry
                         button("Add bank account").action {
-                            TODO()
+                            find<AddBankAccountView>().openModal(stageStyle = StageStyle.UTILITY)
                         }
                     }
                 }
@@ -320,3 +324,65 @@ class BankAccountView : View("Cash Issuer") {
 }
 
 class TestApp : App(BankAccountView::class)
+
+class AddBankAccountView : Fragment("Cash Issuer") {
+    private val model = object : ViewModel() {
+        val accountId = bind { SimpleStringProperty() }
+        val accountName = bind { SimpleStringProperty() }
+        val sortCode = bind { SimpleStringProperty() }
+        val accountNumber = bind { SimpleStringProperty() }
+        val currency = bind { SimpleStringProperty() }
+    }
+
+    override val root = form {
+        fieldset {
+            field("Account ID") {
+                textfield(model.accountId) {
+                    required()
+                    whenDocked { requestFocus() }
+                }
+            }
+            field("Account Name") {
+                textfield(model.accountName) {
+                    required()
+                    whenDocked { requestFocus() }
+                }
+            }
+            field("Sort Code") {
+                textfield(model.sortCode) {
+                    required()
+                    whenDocked { requestFocus() }
+                }
+            }
+            field("Account Number") {
+                textfield(model.accountNumber) {
+                    required()
+                    whenDocked { requestFocus() }
+                }
+            }
+            field("Currency (GBP only)") {
+                textfield(model.currency) {
+                    required()
+                    whenDocked { requestFocus() }
+                }
+            }
+        }
+
+        button("Submit") {
+            isDefaultButton = true
+
+            action {
+                model.commit {
+                    val ukAccountNumber = UKAccountNumber(model.sortCode.value, model.accountNumber.value)
+                    val bankAccount = BankAccount(
+                            accountId = model.accountId.value,
+                            accountName = model.accountName.value,
+                            accountNumber = ukAccountNumber,
+                            currency = Currency.getInstance(model.currency.value)
+                    )
+                    cordaRPCOps.startFlow(::AddBankAccount, bankAccount)
+                }
+            }
+        }
+    }
+}

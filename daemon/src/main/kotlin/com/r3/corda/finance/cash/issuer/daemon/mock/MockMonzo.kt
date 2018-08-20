@@ -16,6 +16,7 @@ import java.util.*
  * If the list of transactions is empty, then we'll generate transactions. Otherwise, they will be taken from the
  * list provided.
  */
+@Suppress("Unused")
 class MockMonzo(
         override val accounts: List<BankAccount> = listOf(mockMonzoAccount),
         override val transactions: MutableList<NostroTransaction> = Collections.synchronizedList<NostroTransaction>(mutableListOf()),
