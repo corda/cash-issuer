@@ -15,13 +15,7 @@ The documentation is incomplete and the code is more instructive than
 anything else. If you do want to use this code and get stuck then e-mail
 roger.willis@r3.com.
 
-The repo is split into two modules:
-
-1. **cash** - a placeholder for the core finance state and contract types.
-   For now there is just a placeholder cash contract.
-2. **cash-issuer** - the cash issuer codebase.
-
-The cash-issuer is split into a number of sub modules:
+The repo is split into a number of modules:
 
 1. **client** - code which should be run by participants in a cash business
    network.
@@ -72,6 +66,14 @@ Add your own bank API clients:
 
 If you have your own Starling or Monzo account you'd like to use, then
 no additional work is required.
+
+Using the Mock Monzo bank account:
+
+* Start the Daemon with the option `-mock-mode`.
+* This way you can experiment with the functionality of the cash issuer
+  without having to use a real bank account.
+* The MockMonzo bank will create realistic-ish transactions at random
+  intervals.
 
 ## Getting started
 
