@@ -2,7 +2,7 @@
 
 ### **Background**
 
-Corda allows members of the same compatibility zone to transact seamlessly across different asset classes on one platform. This, in of itself, is a huge step forward in the blockchain space but there is still a crucial missing piece: in the absence of an on-ledger representation of fiat currency, members of the compatibility zone must settle their on-ledger obligations, off-ledger. Settling off-ledger is a comprise for the following reasons:
+Corda allows members of the same compatibility zone to transact seamlessly across different asset classes on one platform. This, in of itself, is a huge step forward in the blockchain space but there is still a crucial missing piece: in the absence of an on-ledger representation of fiat currency, members of the compatibility zone must settle their on-ledger obligations, off-ledger. Settling off-ledger is a compromise for the following reasons:
 
 * the process requires a complicated two-phase commit protocol where failure modes are difficult to roll-back;
 * transactions which involve cash (probably most transactions) cannot be settled using on-ledger delivery versus payment ("DvP");
