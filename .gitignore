@@ -7,7 +7,6 @@ tags
 *.log
 *.log.gz
 *.orig
-*.conf
 
 .gradle
 
