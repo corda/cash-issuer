@@ -2,10 +2,7 @@ package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.r3.corda.finance.cash.issuer.common.types.*
-import com.r3.corda.finance.cash.issuer.daemon.BankAccountId
-import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiClient
-import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiFactory
-import com.r3.corda.finance.cash.issuer.daemon.getOrThrow
+import com.r3.corda.finance.cash.issuer.daemon.*
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -45,10 +42,10 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
 
     private fun accounts(): List<BankAccount> {
         // TODO: Filter accounts based upon those whitelisted in the config file.
-        val accounts = api.accounts().getOrThrow().accounts.filter { !it.closed }
+        val accounts = wrapWithTry { api.accounts().getOrThrow().accounts.filter { !it.closed } }
         // Monzo doesn't provide the currency of its accounts.
         // For now they are all GBP but that might change...
-        val currencies = accounts.map { balance(it.id).token }
+        val currencies = wrapWithTry { accounts.map { balance(it.id).token } }
         require(currencies.size == accounts.size) { "Couldn't obtain currency information for all accounts." }
         // Join the currencies to the bank account data.
         val accountsWithCurrencies = accounts.zip(currencies)
@@ -60,7 +57,7 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
 
     override fun balance(accountId: BankAccountId?): Amount<Currency> {
         if (accountId == null) throw IllegalArgumentException("AccountId is required for Monzo::balance.")
-        val balance = api.balance(accountId).getOrThrow()
+        val balance = wrapWithTry { api.balance(accountId).getOrThrow() }
         return Amount(balance.balance, balance.currency)
     }
 
@@ -71,8 +68,10 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
             // here the timestamp in incremented by 1 millisecond.
             // TODO: Remove this hack and use the transaction ID instead.
             val lastTransactionTimestamp = lastTransactions[accountId]?.plusMillis(1L)
-            api.transactions(account.accountId, null, lastTransactionTimestamp?.toString(), null).observeOn(Schedulers.io()).map {
-                it.transactions.map { it.toNostroTransaction(ourAccount = account.accountNumber) }
+            wrapWithTry {
+                api.transactions(account.accountId, null, lastTransactionTimestamp?.toString(), null).observeOn(Schedulers.io()).map {
+                    it.transactions.map { transaction -> transaction.toNostroTransaction(ourAccount = account.accountNumber) }
+                }
             }
         }
 

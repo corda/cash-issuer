@@ -5,6 +5,7 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.getOrThrow
+import java.lang.reflect.InvocationTargetException
 import java.util.*
 
 private val clientsPackage = "com.r3.corda.finance.cash.issuer.daemon.clients"
@@ -31,7 +32,12 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
                             "client. In addition an associated config file is required for each bank API. E.g. For " +
                             "Monzo a config file called \"monzo.conf\" is required.")
                 }
-                val apiClient = it.getDeclaredConstructor(String::class.java).newInstance(apiName.toLowerCase())
+                val apiClient = try {
+                    it.getDeclaredConstructor(String::class.java).newInstance(apiName.toLowerCase())
+                } catch (e: InvocationTargetException) {
+                    throw RuntimeException("Creating open banking API client failed. The most likely reason is bad credentials. " +
+                            "Check your API key. If you don't have a monzo or starling account, then run the daemon in --mock-mode")
+                }
                 println("\t* Loaded $apiName API interface and client.")
                 add(apiClient)
             }.scan()

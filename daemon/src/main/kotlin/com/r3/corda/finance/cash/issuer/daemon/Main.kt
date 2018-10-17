@@ -72,8 +72,14 @@ private fun repl(daemon: AbstractDaemon, cmdLineOptions: CommandLineOptions) {
                 println("Bye bye!")
                 exitProcess(0)
             }
+            "exit" -> {
+                println("Bye bye!")
+                exitProcess(0)
+            }
             "help" -> {
-                println("No help yet!")
+                println("start - start polling for transactions.")
+                println("stop - stop polling for transactions.")
+                println("exit/quit - Exit process.")
                 prompt()
             }
             else -> {

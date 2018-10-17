@@ -12,12 +12,19 @@ import net.corda.core.utilities.loggerFor
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
+import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
 abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: CommandLineOptions) {
     protected val autoStart: Boolean = cmdLineOptions.autoMode
 
-    protected val openBankingApiClients: List<OpenBankingApi> by lazy { scanForOpenBankingApiClients() }
+    protected val openBankingApiClients: List<OpenBankingApi> by lazy {
+        try {
+            scanForOpenBankingApiClients()
+        } catch (e: RuntimeException) {
+            throw e
+        }
+    }
 
     // Maps bank account IDs to the open banking api client which provides access.
     protected val accountsToBank: Map<BankAccountId, OpenBankingApi> by lazy {
@@ -92,17 +99,17 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
 
     private fun printBalances(balances: List<Balance>) {
         println("\nChecking bank balances for differences...\n")
-        println("\tAccount ID\t\t\t\tNode Balance\t\tBank Balance\t\tDifference")
-        println("\t----------\t\t\t\t------------\t\t------------\t\t----------")
+        println("\tAccount ID\t\tNode Balance\t\tBank Balance\t\tDifference")
+        println("\t----------\t\t------------\t\t------------\t\t----------")
         var totalDifference = 0L
         balances.forEach { (accountId, node, bank) ->
             val id = accountId.truncate()
             val difference = node.quantity - bank.quantity
             totalDifference += difference
-            println("\t$id\t\t$node\t\t\t$bank\t\t\t$difference")
+            println("\t$id\t\t$node\t\t$bank\t\t$difference")
         }
         println()
-        println("\t\t\t\t\t\t\t\t\t\t\tTotal difference: \t\t$totalDifference")
+        println("\t\t\t\t\t\t\tTotal difference: \t\t$totalDifference")
     }
 
     private fun getLastRecordedNostroTransactions() {
@@ -116,8 +123,8 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
         }
         val lastUpdatesByAccountId = services.startFlowDynamic(GetLastUpdatesByAccountId::class.java).returnValue.getOrThrow()
         if (lastUpdatesByAccountId.isNotEmpty()) {
-            println("\tAccount ID\t\t\t\tTimestamp")
-            println("\t----------\t\t\t\t---------")
+            println("\tAccount ID\t\tTimestamp")
+            println("\t----------\t\t---------")
             lastUpdatesByAccountId.forEach { (accountId, timestamp) ->
                 // Use the start from timestamp if it was specified in the options and greater than the timestamps
                 // of the last stored transactions in the node.
