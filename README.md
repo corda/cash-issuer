@@ -93,7 +93,7 @@ Start the corda nodes and issuer daemon:
 
 1. Assuming all the API clients you need are implemented and a working
    config is present in the `resources` directory, then you are good to
-   go! THe repo comes with a config file for Monzo and Starling. You just
+   go! The repo comes with a config file for Monzo and Starling. You just
    need to add your API key which has permission to view accounts, view transactions
    and check balances. If you don't have a Starling or Monzo account then use
    the daemon in `--mock-mode`
@@ -138,6 +138,9 @@ perform a demo run of an issuance:
 7. Run `run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State`
     from PartyA to inspect the amount of cash issued. It should be for
     the same amount of the payment sent to the issuer's account.
+    
+Next things to do are to transfer the cash from A to B, then send the cash from B 
+to the Issuer node for redemption.
 
 ## Starting the issuer daemon
 
