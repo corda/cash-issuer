@@ -2,18 +2,29 @@
 
 # Corda Cash Issuer
 
-**WARNING: DO NOT USE IN PRODUCTION!**
+## WARNING:
 
-**WARNING:** To run this code, you need to use version 4.0-SNAPSHOT of
-Corda or greater. This code also only works with UK bank accounts that
-provide open banking APIs.
+**!!! DO NOT USE IN PRODUCTION !!!**
 
-This repo contains a reference implementation of the Corda cash issuer as
+**!! __DO NOT__ USE THIS CODE WITH REAL CUSTOMERS IF YOUR COMPANY DOES NOT
+HAVE AN ELECTRONIC MONEY LICENCE IN THE EU !!**
+
+**!! THIS CODE IS INTENDED TO BE USED WITH EMPHEMERAL CORDA NETWORKS FOR DEMO 
+PUROSES ONLY !!**
+
+This code use a nightly snapshot (4.0-SNAPSHOT) release of Corda 
+obtained from the R3 artifactory repository. There is a chance that a particular
+build could be unstable!
+
+This code works with Monzo and Starling bank accounts. For those that do not have
+Monzo or Starling bank accounts you can use the `MockMonzo` client to generate
+fake transaction data.
+
+This repo contains an example of how to implement a cash issuer/cash tokenizer as
 described in the [accompanying design document](design/design.md).
 
-The documentation is incomplete and the code is more instructive than
-anything else. If you do want to use this code and get stuck then e-mail
-roger.willis@r3.com.
+The code is more instructive than anything else. If you do want to use this code 
+and get stuck then e-mail `roger.willis@r3.com`.
 
 The repo is split into a number of modules:
 
@@ -38,8 +49,8 @@ The repo is split into a number of modules:
 2. The bank holding the Issuer's bank account needs to offer a
    public API which allows clients to get account information, balance
    information and transaction information in real time.
-3. You will need a working API key for the bank's API.
-4. A special SNAPSHOT version of Corda (Ask Roger for more information).
+3. You will need a working API key for the bank's API. If you don't have this 
+   then you must start ed `daemon` in `mock-mode`.
 
 ## How to use this code
 
@@ -66,6 +77,8 @@ Add your own bank API clients:
 
 If you have your own Starling or Monzo account you'd like to use, then
 no additional work is required.
+
+Starling and Monzo sometimes change their API, if they do then this code will break.
 
 Using the Mock Monzo bank account:
 
@@ -124,7 +137,7 @@ perform a demo run of an issuance:
 
 ## Starting the issuer daemon
 
-1. Start the daemon via the main method in `Main.kt`. The daemon should
+1. Start the daemon via the main method in `Main.kt` from IntelliJ. The daemon should
    start and present you with a simple command line interface. The daemon
    requires a number of command line parameters. The main ones to know are:
    ```
@@ -134,7 +147,14 @@ perform a demo run of an issuance:
    ```
    All three of the above arguments are required. As such, note that if
    no corda node is available to connect to on the specified hostname and
-   port, then the daemon will not start.
+   port, then the daemon will not start successfully.
+   
+   There are three other parameters to note:
+   ```
+   mock-mode - use this if you don't want to use a real bank account.
+   auto-mode - Use this to start polling the bank accounts for new transactions as soon as the daemon startes.
+   start-from - Use this flag to ignore all the past transactions in the bank account. This is useful if you want to perform a demo and need to re-use the same account multiple times but give the impression that the demo is from "scratch".
+    ```
 2. When the daemon starts up, it requests bank account information for all
    the supplied API interfaces. It then uploads the account information to
    the issuer node, via RPC. Note: if the daemon is connected to a corda
