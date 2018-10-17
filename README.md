@@ -93,15 +93,20 @@ Start the corda nodes and issuer daemon:
 
 1. Assuming all the API clients you need are implemented and a working
    config is present in the `resources` directory, then you are good to
-   go!
+   go! THe repo comes with a config file for Monzo and Starling. You just
+   need to add your API key which has permission to view accounts, view transactions
+   and check balances. If you don't have a Starling or Monzo account then use
+   the daemon in `--mock-mode`
 2. From the root of this repo run `./gradlew clean deployNodes`. The
    deployNodes script will build `Notary` `Issuer`, `PartyA` and `PartyB`
    nodes.
 3. Navigate to the node directories `cd build/nodes`.
 4. Run the nodes `./runnodes`.
 5. Wait for all the nodes to start up.
-6. Start the issuer daemon (See "Starting the issuer daemon" below).
-7. Start the issuer `service-ui`. Run via the Green Arrow next to the
+6. Build the issuer daemon jar with `./gradlew :daemon:jar` the jar will be
+   output to `daemon/build/libs/daemon-0.1.jar`
+7. Start the issuer daemon (See "Starting the issuer daemon" below).
+8. Start the issuer `service-ui` via IntelliJ. Run via the Green Arrow next to the
    `main` function in `com/r3/corda/finance/cash/issuer/Main.kt`. The app
    is defaulted to connect to the Issuer node on port 10006. This can be
    changed in `Main.kt` if required.
@@ -109,34 +114,35 @@ Start the corda nodes and issuer daemon:
 At this point all the required processes are up and running. Next, you can
 perform a demo run of an issuance:
 
-8. From `PartyA` add a new bank account via the node shell: `flow start Add bankAccount: { accountId: 12345, accountName: Rogers Account, accountNumber: { sortCode: “XXXXXX”, accountNumber: YYYYYYYY, type: uk }, currency: GBP }`
+1. From `PartyA` add a new bank account via the node shell: `flow start Add bankAccount: { accountId: 12345, accountName: Rogers Account, accountNumber: { sortCode: “XXXXXX”, accountNumber: YYYYYYYY, type: uk }, currency: GBP }`
    replacing `XXXXXX` and `YYYYYYYY` with your sort code and account number.
    This is the bank account that you will make a payment from, to the issuer's
    account.
-9. Next, we need to send the bank account you have just added, to the
+2. Next, we need to send the bank account you have just added, to the
    issuer node. First, we need to know the linear ID of the bank account
    state which has just been added: `run vaultQuery contractStateType: com.r3.corda.finance.cash.issuer.common.states.BankAccountState`.
    You should see the linear ID in the data structure which is output to the shell.
    Send the account to the issuer with `start Send issuer: Issuer, linearId: LINEAR_ID`.
-10. You should see the issuer's UI update with new bank account information.
+3. You should see the issuer's UI update with new bank account information.
     Note: the issuer's account should already be added.
-11. From the issuer daemon shell type `start`. The daemon should start
+4. From the issuer daemon shell type `start`. The daemon should start
     polling for new transactions.
-12. Make a payment (for a small amount!!) from `PartyA`s bank account to
+5. Make a payment (for a small amount!!) from `PartyA`s bank account to
     the `Issuer`s bank account. Soon after the payment has been made, the
     daemon should pick up the transaction information and the Issuer UI
     should update in the "nostro transactions" pane and the "node transactions"
     pane.
-13. Assuming the correct details for the bank account used by PartyA were
+6. Assuming the correct details for the bank account used by PartyA were
     added and successfully sent to the issuer, then the issuance record in
     the node transaction tab should be marked as complete.
-14. Run `run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State`
+7. Run `run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State`
     from PartyA to inspect the amount of cash issued. It should be for
     the same amount of the payment sent to the issuer's account.
 
 ## Starting the issuer daemon
 
-1. Start the daemon via the main method in `Main.kt` from IntelliJ. The daemon should
+1. Start the daemon either via the main method in `Main.kt` from IntelliJ or 
+   from the JAR created above with `java -jar daemon-0.1.jar`. The daemon should
    start and present you with a simple command line interface. The daemon
    requires a number of command line parameters. The main ones to know are:
    ```
