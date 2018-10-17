@@ -2,6 +2,7 @@ package com.r3.corda.finance.cash.issuer.daemon
 
 import joptsimple.OptionException
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.client.rpc.RPCException
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort.Companion.parse
 import java.util.*
@@ -92,7 +93,11 @@ private fun repl(daemon: AbstractDaemon, cmdLineOptions: CommandLineOptions) {
 
 fun main(args: Array<String>) {
     val cmdLineOptions = parseArguments(*args)
-    val services = connectToCordaRpc(cmdLineOptions.rpcHostAndPort, cmdLineOptions.rpcUser, cmdLineOptions.rpcPass)
+    val services = try {
+        connectToCordaRpc(cmdLineOptions.rpcHostAndPort, cmdLineOptions.rpcUser, cmdLineOptions.rpcPass)
+    } catch (e: RPCException) {
+        throw RuntimeException("Could not connect to RPC client on host and post: ${cmdLineOptions.rpcHostAndPort}.")
+    }
     welcome()
     if (cmdLineOptions.mockMode) {
         repl(MockDaemon(services, cmdLineOptions), cmdLineOptions)
