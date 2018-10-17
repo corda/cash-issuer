@@ -71,7 +71,7 @@ Add your own bank API clients:
    ```
    apiBaseUrl="[URL HERE]"
    apiVersion=""
-   apiAccessToken="[ADD ACCESS TOKEN HERE"
+   apiAccessToken="[ADD ACCESS TOKEN HERE]"
    ```
 
 If you have your own Starling or Monzo account you'd like to use, then
