@@ -15,6 +15,10 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 
+/**
+ * Adds a new [BankAccount] state to the ledger.
+ * The state is alwats added as a "uni-lateral state" to the node calling this flow.
+ */
 @StartableByRPC
 @StartableByService
 class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction>() {
@@ -22,6 +26,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
     companion object {
         // TODO: Add the rest of the progress tracker.
         object FINALISING : ProgressTracker.Step("Finalising transaction.")
+
         fun tracker() = ProgressTracker(FINALISING)
     }
 

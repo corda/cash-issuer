@@ -24,7 +24,7 @@ class IssueCashInternal(val to: AbstractParty, val amount: Amount<Currency>) : F
         // this issuance. We include this so we can check it during redemption time. Using this as the reference means
         // that cash states won't get merged very often as it's likely that the reference is different (one for each
         // issuance).
-        // TODO: Think about issuer references. Currently cash selection doens't work with issuer references.
+        // TODO: Issuer references is a dud concept. We should deprecate it in Corda Core.
         val partyAndReference = PartyAndReference(ourIdentity, OpaqueBytes.of(0))
         val issuerAndToken = Issued(partyAndReference, amount.token)
         val issuedAmount = Amount(amount.quantity, issuerAndToken)

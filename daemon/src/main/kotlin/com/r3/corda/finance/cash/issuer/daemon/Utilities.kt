@@ -5,8 +5,6 @@ import net.corda.core.utilities.getOrThrow
 import rx.Observable
 import rx.schedulers.Schedulers
 
-const val MAX_RETRIES = 3
-
 // TODO: Make this fault tolerant.
 // TODO: Deal with HTTP error codes
 // Retry with exponential back-off.

@@ -15,6 +15,10 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.loggerFor
 import rx.schedulers.Schedulers
 
+/**
+ * This service listens for transaction updates and decides what to do based upon the data in the transaction.
+ * It starts flows on new threads.
+ */
 @CordaService
 class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsToken() {
 
@@ -28,6 +32,9 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
         // event being emitted and the flow starting, then the flows will have to be started manually.
         // We can do this by pulling out all the nostro transaction states and running the process flow over
         // all UNMATCHED states.
+
+        // Shouldn't really use this it will soon be deprecated.
+        // TODO: For Corda core: We need to add commands to vault update events.
         services.validatedTransactions.updates.observeOn(Schedulers.io()).subscribe({ signedTransaction ->
 
             val isAddBankAccount = checkCommand<BankAccountContract.Add>(signedTransaction)

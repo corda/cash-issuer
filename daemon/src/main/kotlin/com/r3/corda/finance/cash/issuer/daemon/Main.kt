@@ -7,16 +7,15 @@ import net.corda.core.utilities.NetworkHostAndPort.Companion.parse
 import java.util.*
 import kotlin.system.exitProcess
 
-private fun parseArguments(vararg args: String): Pair<ArgsParser, CommandLineOptions> {
+private fun parseArguments(vararg args: String): CommandLineOptions {
     val argsParser = ArgsParser()
-    val cmdlineOptions = try {
+    return try {
         argsParser.parse(*args)
     } catch (ex: OptionException) {
         println("Invalid command line arguments: ${ex.message}")
         argsParser.printHelp(System.out)
         exitProcess(1)
     }
-    return Pair(argsParser, cmdlineOptions)
 }
 
 // Connects to a Corda node specified by a hostname and port using the provided user name and pawssword.
@@ -86,7 +85,7 @@ private fun repl(daemon: AbstractDaemon, cmdLineOptions: CommandLineOptions) {
 }
 
 fun main(args: Array<String>) {
-    val (argsParser, cmdLineOptions) = parseArguments(*args)
+    val cmdLineOptions = parseArguments(*args)
     val services = connectToCordaRpc(cmdLineOptions.rpcHostAndPort, cmdLineOptions.rpcUser, cmdLineOptions.rpcPass)
     welcome()
     if (cmdLineOptions.mockMode) {

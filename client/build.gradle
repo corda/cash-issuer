@@ -6,8 +6,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven { url 'https://jitpack.io' }
-    maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/'}
-    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/' }
 }
 
 apply plugin: 'kotlin'
@@ -51,8 +50,6 @@ dependencies {
     cordaCompile "$corda_release_group:corda-jackson:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
     cordaRuntime "$corda_release_group:corda:$corda_release_version"
-
-    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
     cordapp project(":common")

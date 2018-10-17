@@ -12,13 +12,16 @@ import net.corda.core.flows.StartableByService
 import net.corda.core.identity.Party
 import net.corda.core.utilities.ProgressTracker
 
+/**
+ * Sends the tx which creates the banks account state to the issuer.
+ */
 @StartableByRPC
 @StartableByService
 class SendBankAccount(val issuer: Party, val linearId: UniqueIdentifier) : AbstractSendBankAccount() {
 
     companion object {
-        // TODO: Add the rest of the progress tracker.
         object SENDING : ProgressTracker.Step("Sending to issuer.")
+
         fun tracker() = ProgressTracker(SENDING)
     }
 

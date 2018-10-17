@@ -22,9 +22,7 @@ import java.util.*
 class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRedeemCash() {
 
     companion object {
-        // TODO: Add the rest of the progress tracker.
         object REDEEMING : ProgressTracker.Step("Redeeming cash.")
-
         fun tracker() = ProgressTracker(REDEEMING)
     }
 
@@ -42,7 +40,6 @@ class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRede
         progressTracker.currentStep = REDEEMING
         subFlow(SendStateAndRefFlow(session, exitStates))
         session.send(amount.issuedBy(PartyAndReference(issuer, OpaqueBytes.of(0))))
-
         subFlow(object : SignTransactionFlow(session) {
             override fun checkTransaction(stx: SignedTransaction) = Unit
         })

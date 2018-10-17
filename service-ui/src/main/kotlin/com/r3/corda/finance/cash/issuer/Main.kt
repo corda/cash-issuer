@@ -26,6 +26,10 @@ import tornadofx.*
 import java.time.Instant
 import java.util.*
 
+/**
+ * This file is a big mess but it does the job of creating a "good enough" java fx UI for the issuer.
+ */
+
 class BankAccountUiModel(
         owner: Party,
         internalAccountId: UUID,

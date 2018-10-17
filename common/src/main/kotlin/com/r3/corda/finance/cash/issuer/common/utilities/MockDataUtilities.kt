@@ -31,9 +31,9 @@ fun generateRandomString(length: Long, scheme: GenerationScheme = GenerationSche
 
 
 /**
- * For generating random numbers. A ceiling can be provided
+ * For generating random numbers.
+ * A ceiling can be provided to ensure we generate numbers < ceiling.
  */
-// TODO: This can be improved.
 // Simple function to create realistic'ish transaction amounts. For now it's OK.
 fun randomAmountGenerator(ceiling: Long? = null): Long {
     fun generate(): Long {
@@ -91,8 +91,14 @@ data class MockContact(val id: String, val name: String, val accountNumber: Acco
  * Generates mock transaction data at random intervals, forever.
  * TODO: Mess around with publishOn() / subscribeOn() to see which schedulers perform the best.
  */
-class MockTransactionGenerator(txGenerator: () -> NostroTransaction, fastForward: Boolean, gapGenerator: () -> Long = randomDelayGenerator(fastForward)) {
+class MockTransactionGenerator(
+        txGenerator: () -> NostroTransaction,
+        fastForward: Boolean,
+        gapGenerator: () -> Long = randomDelayGenerator(fastForward)
+) {
     private var generatorSubscription: Subscription? = null
+
+    // This calls the provided function at random intervals.
     private val transactionStream = Observable
             .fromCallable { txGenerator() }
             .delay { Observable.timer(gapGenerator(), TimeUnit.SECONDS) }

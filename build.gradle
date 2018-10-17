@@ -1,14 +1,14 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
     ext.corda_release_version = '4.0-SNAPSHOT'
-    ext.corda_gradle_plugins_version = '4.0.28'
+    ext.corda_gradle_plugins_version = '4.0.25'
     ext.kotlin_version = '1.2.51'
     ext.junit_version = '4.12'
-    ext.quasar_group = 'com.github.corda.quasar'
-    ext.quasar_version = '7629695563deae6cc95adcfbebcbc8322fd0241a'
+    ext.quasar_version = '0.7.9'
+    ext.retrofit_version = '2.4.0'
+    ext.okhttp_version = '3.9.1'
     ext.retrofit_version = '2.4.0'
     ext.jopt_simple_version = '5.0.2'
-    ext.braid_version = '3.0.5-SNAPSHOT'
     ext.slf4j_version = '1.7.25'
     ext.log4j_version = '2.9.1'
 
@@ -16,7 +16,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         jcenter()
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/' }
     }
 
     dependencies {
@@ -31,9 +31,10 @@ repositories {
     mavenLocal()
     jcenter()
     mavenCentral()
+    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/'}
-    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+
 }
 
 apply plugin: 'kotlin'
@@ -78,8 +79,6 @@ dependencies {
     cordaCompile "$corda_release_group:corda-rpc:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
     cordaRuntime "$corda_release_group:corda:$corda_release_version"
-
-    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     // CorDapp dependencies
     // Specify your CorDapp's dependencies below, including dependent CorDapps.

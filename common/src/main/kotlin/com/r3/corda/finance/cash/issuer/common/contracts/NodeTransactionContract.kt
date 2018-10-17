@@ -15,7 +15,6 @@ class NodeTransactionContract : Contract {
     class Create : Commands
     class Update : Commands
 
-    override fun verify(tx: LedgerTransaction) {
-
-    }
+    // TODO: Contract code not implemented for demo.
+    override fun verify(tx: LedgerTransaction) = Unit
 }

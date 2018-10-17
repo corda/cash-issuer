@@ -19,6 +19,8 @@ import net.corda.core.node.services.vault.Builder.equal
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.builder
 
+/** Bunch of helpers for querying the vault. */
+
 fun getBankAccountStateByAccountNumber(accountNumber: AccountNumber, services: ServiceHub): StateAndRef<BankAccountState>? {
     val states = getState<BankAccountState>(services) { generalCriteria ->
         val additionalCriteria = QueryCriteria.VaultCustomQueryCriteria(BankAccountStateSchemaV1.PersistentBankAccountState::accountNumber.equal(accountNumber.digits))

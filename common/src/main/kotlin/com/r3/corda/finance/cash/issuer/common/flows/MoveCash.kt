@@ -14,7 +14,9 @@ import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.CashException
 import java.util.*
 
-// This is just temporary for demoing.
+/**
+ * Simple move cash flow for demos.
+ */
 @StartableByRPC
 class MoveCash(val recipient: Party, val amount: Amount<Currency>) : FlowLogic<SignedTransaction>() {
 

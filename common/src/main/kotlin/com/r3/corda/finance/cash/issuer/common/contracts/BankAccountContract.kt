@@ -15,6 +15,7 @@ class BankAccountContract : Contract {
     class Add : Commands
     class Update : Commands
 
+    // TODO: Contract code not implemented for demo.
     override fun verify(tx: LedgerTransaction) = Unit
 
 }
