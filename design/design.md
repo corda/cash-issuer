@@ -2,14 +2,12 @@
 
 ### **Background**
 
-Corda allows members of the same compatibility zone to transact seamlessly across different asset classes on one platform. This, in of itself, is a huge step forward in the blockchain space but there is still a crucial missing piece: in the absence of an on-ledger representation of fiat currency, members of the compatibility zone must settle their on-ledger obligations, off-ledger. Settling off-ledger is a compromise for the following reasons:
+Corda allows members of the same compatibility zone to transact seamlessly across different asset classes on one platform. This in itself is a huge step forward in the blockchain space.  However the full potential of blockchain is realised when participants can execute atomic transactions involving both digital assets and digital cash.  Without an on-ledger medium of exchange, members of the Corda Network must settle their obligations by finding a coincidence of wants (digital barterning), or taking the settlement obligation to another ledger for settlement.  Corda does and will continue to include tools to help users settle obligations on any rails, using:
 
-* the process requires a complicated two-phase commit protocol where failure modes are difficult to roll-back;
-* transactions which involve cash (probably most transactions) cannot be settled using on-ledger delivery versus payment ("DvP");
-* a high level of proof that off-ledger settlement actually occurred is necessary—this requires enhancing traditional payment rails and core banking systems with the capability of providing cryptographic proofs;
-* these enhancements need to be rolled-out across all banks for off-ledger settlement to be widely available
+* a two-phase commit protocol, 
+* and a high level of proof that off-ledger settlement actually occurred (which may require enhancements in traditional payment rails and core banking systems)
 
-The better alternative is for members of a Corda compatibility zone to be able to extinguish obligations which arise on ledger, with an on-ledger digital representation of fiat currency. This is what R3 has termed "cash on ledger". In order to facilitate cash on ledger, there must be a legal entity which bridges the traditional banking system with the Corda compatibility zone—this is the role of the "Issuer" node. 
+The full potential of blockchain technology will be realised when members of a Corda compatibility zone can extinguish obligations which arise on ledger, with an on-ledger digital representation of fiat currency. This is what R3 has termed "cash on ledger". Most implementations of cash on ledger require a legal entity which bridges the traditional banking system with the Corda compatibility zone — this is the role of the "Issuer" node. 
 
 ### Types of cash on ledger
 
@@ -22,7 +20,7 @@ It is useful to depict the relationship between central bank money and commercia
 
 <img src="images/central-bank.png" width="500px"/>
 
-Today, it is only commercial banks which have access to central bank reserves, although there are some exceptions such as [CLS Bank](https://en.wikipedia.org/wiki/CLS_Group). As such, non-banks can only hold and transact with commercial bank money. Central bank digital currency ("CBDC") initiatives, where non-banks can hold and transact in central bank reserves have been discussed but there are no credible implementations on the horizon. 
+Today, it is only commercial banks which have access to central bank reserves, although there are some exceptions. As such, non-banks can only hold and transact with commercial bank money. Central bank digital currency ("CBDC") initiatives, where non-banks can hold and transact in central bank reserves have been discussed but there are no credible implementations on the horizon. 
 
 There are some assumptions to be made about issuance of each type of money:
 
