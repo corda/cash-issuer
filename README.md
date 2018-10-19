@@ -86,6 +86,17 @@ Using the Mock Monzo bank account:
   without having to use a real bank account.
 * The MockMonzo bank will create realistic-ish transactions at random
   intervals.
+* The transactions created by the MockMonzo bank come from five pre-defined bank 
+  account numbers, which are:
+
+        Account number: 13371337, sort code: 442200
+        Account number: 12345678, sort code: 873456
+        Account number: 73510753, sort code: 059015
+        Account number: 34782115, sort code: 022346
+        Account number: 90143578, sort code: 040040 
+  
+  When following the instructions below, add one of these banks accounts to
+  NodeA.
 
 ## Getting started
 
