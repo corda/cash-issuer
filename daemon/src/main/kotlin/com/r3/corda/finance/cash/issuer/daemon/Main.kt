@@ -66,7 +66,6 @@ private fun repl(daemon: AbstractDaemon, cmdLineOptions: CommandLineOptions) {
             }
             "stop" -> {
                 daemon.stop()
-
                 prompt()
             }
             "quit" -> {

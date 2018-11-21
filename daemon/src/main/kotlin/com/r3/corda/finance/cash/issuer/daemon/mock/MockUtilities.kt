@@ -27,11 +27,11 @@ val mockMonzoAccount = BankAccount(
 )
 
 val mockMonzoCounterparties = listOf(
-        MockContact("anonuser_e4d0fc5b4693fc16219ef7", "Roger Willis", UKAccountNumber("13371337", "442200")),
-        MockContact("anonuser_qb9hcjpaem61mocujv3zh4", "David Nicol", UKAccountNumber("12345678", "873456")),
-        MockContact("anonuser_x636uuqj1b913bd1mflm61", "Richard Brown", UKAccountNumber("73510753", "059015")),
-        MockContact("anonuser_keu8gr5fs4qw6kj4nufy91", "Todd McDonald", UKAccountNumber("34782115", "022346")),
-        MockContact("anonuser_z1oxucxi9ooep90oteb4qw", "Mike Hearn", UKAccountNumber("90143578", "040040"))
+        MockContact("anonuser_e4d0fc5b4693fc16219ef7", "Roger Willis", UKAccountNumber("442200", "13371337")),
+        MockContact("anonuser_qb9hcjpaem61mocujv3zh4", "David Nicol", UKAccountNumber("873456", "12345678")),
+        MockContact("anonuser_x636uuqj1b913bd1mflm61", "Richard Brown", UKAccountNumber("059015", "73510753")),
+        MockContact("anonuser_keu8gr5fs4qw6kj4nufy91", "Todd McDonald", UKAccountNumber("022346", "34782115")),
+        MockContact("anonuser_z1oxucxi9ooep90oteb4qw", "Mike Hearn", UKAccountNumber("040040", "90143578"))
 )
 
 /**
