@@ -15,10 +15,7 @@ import com.r3.corda.finance.cash.issuer.common.utilities.getPendingRedemptionByN
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowException
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.StartableByService
+import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.time.Instant
@@ -168,7 +165,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         }
 
         val stx = serviceHub.signInitialTransaction(builder)
-        return subFlow(FinalityFlow(stx))
+        return subFlow(FinalityFlow(stx, emptySet<FlowSession>()))
     }
 
 }

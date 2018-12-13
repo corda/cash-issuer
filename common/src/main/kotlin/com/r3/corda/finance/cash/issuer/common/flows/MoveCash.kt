@@ -5,6 +5,7 @@ import net.corda.core.contracts.Amount
 import net.corda.core.contracts.InsufficientBalanceException
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -43,6 +44,6 @@ class MoveCash(val recipient: Party, val amount: Amount<Currency>) : FlowLogic<S
         logger.info(transactionBuilder.toWireTransaction(serviceHub).toString())
         val signedTransaction = serviceHub.signInitialTransaction(transactionBuilder, keys)
         progressTracker.currentStep = MOVING
-        return subFlow(FinalityFlow(signedTransaction))
+        return subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>()))
     }
 }

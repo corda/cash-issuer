@@ -61,6 +61,6 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         logger.info(transactionBuilder.toWireTransaction(serviceHub).toString())
         val partiallySignedTransaction = serviceHub.signInitialTransaction(transactionBuilder, serviceHub.keyManagementService.filterMyKeys(signers))
         val signedTransaction = subFlow(CollectSignaturesFlow(partiallySignedTransaction, listOf(otherSession)))
-        return subFlow(FinalityFlow(signedTransaction))
+        return subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>()))
     }
 }

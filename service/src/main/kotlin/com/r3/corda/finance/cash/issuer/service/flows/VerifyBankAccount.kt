@@ -20,6 +20,7 @@ class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTran
     @Suspendable
     override fun call(): SignedTransaction {
         logger.info("Starting VerifyBankAccount flow.")
+
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val bankAccountStateAndRef = getBankAccountStateByAccountNumber(accountNumber, serviceHub)
                 ?: throw FlowException("Bank account $accountNumber not found.")
@@ -28,6 +29,8 @@ class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTran
         if (bankAccountState.verified) {
             throw FlowException("Bank account $accountNumber is already verified.")
         }
+
+        val session = initiateFlow(bankAccountState.owner)
 
         logger.info("Updating verified flag for ${bankAccountState.accountNumber}.")
         val updatedBankAccountState = bankAccountState.copy(verified = true)
@@ -38,7 +41,7 @@ class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTran
                 .addOutputState(updatedBankAccountState, BankAccountContract.CONTRACT_ID)
         val stx = serviceHub.signInitialTransaction(utx)
         // Share the updated bank account state with the owner.
-        return subFlow(FinalityFlow(stx, setOf(bankAccountState.owner)))
+        return subFlow(FinalityFlow(stx, setOf(session)))
     }
 
 }

@@ -8,6 +8,7 @@ import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.utilities.getPendingRedemptionByNotes
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -39,7 +40,7 @@ class ProcessRedemptionPayment(val signedTransaction: SignedTransaction) : FlowL
                 .addReferenceState(signedTransaction.tx.outRefsOfType<NostroTransactionState>().single().referenced())
                 .addCommand(NodeTransactionContract.Update(), listOf(ourIdentity.owningKey))
         val stx = serviceHub.signInitialTransaction(transactionBuilder)
-        subFlow(FinalityFlow(stx))
+        subFlow(FinalityFlow(stx, emptySet<FlowSession>()))
         logger.info(stx.tx.toString())
     }
 }

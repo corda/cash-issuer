@@ -1,10 +1,12 @@
 package com.r3.corda.finance.cash.issuer.common.states
 
+import com.r3.corda.finance.cash.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.finance.cash.issuer.common.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NostroTransactionType
 import net.corda.core.contracts.AmountTransfer
+import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -15,6 +17,7 @@ import net.corda.core.schemas.QueryableState
 import java.time.Instant
 import java.util.*
 
+@BelongsToContract(NostroTransactionContract::class)
 data class NostroTransactionState(
         val accountId: String,
         val amountTransfer: AmountTransfer<Currency, AccountNumber>,

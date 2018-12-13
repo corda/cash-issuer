@@ -7,6 +7,7 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.identity.AbstractParty
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -39,6 +40,6 @@ class IssueCashInternal(val to: AbstractParty, val amount: Amount<Currency>) : F
 
         // Sign and finalise.
         val externalStx = serviceHub.signInitialTransaction(externalBuilder)
-        return subFlow(FinalityFlow(externalStx))
+        return subFlow(FinalityFlow(externalStx, emptySet<FlowSession>()))
     }
 }

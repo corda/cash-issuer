@@ -7,10 +7,7 @@ import com.r3.corda.finance.cash.issuer.common.types.toState
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByAccountNumber
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.StartableByRPC
-import net.corda.core.flows.StartableByService
+import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
@@ -57,7 +54,7 @@ class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction
         val signedTransaction = serviceHub.signInitialTransaction(unsignedTransaction)
 
         progressTracker.currentStep = FINALISING
-        return subFlow(FinalityFlow(signedTransaction))
+        return subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>()))
     }
 
 }

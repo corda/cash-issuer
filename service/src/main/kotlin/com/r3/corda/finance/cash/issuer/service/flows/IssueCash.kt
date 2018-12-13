@@ -7,6 +7,7 @@ import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -34,7 +35,7 @@ class IssueCash(val stx: SignedTransaction) : FlowLogic<Pair<SignedTransaction, 
                 .addOutputState(nodeTransactionState.copy(status = NodeTransactionStatus.COMPLETE), NodeTransactionContract.CONTRACT_ID)
 
         val signedTransaction = serviceHub.signInitialTransaction(internalBuilder)
-        val internalFtx = subFlow(FinalityFlow(signedTransaction))
+        val internalFtx = subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>()))
 
         /** Commit the cash issuance transaction. */
         val externalFtx = subFlow(IssueCashInternal(

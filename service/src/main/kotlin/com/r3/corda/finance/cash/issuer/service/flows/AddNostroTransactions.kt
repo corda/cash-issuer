@@ -9,6 +9,7 @@ import com.r3.corda.finance.cash.issuer.common.utilities.getNostroTransactionSta
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
@@ -42,6 +43,7 @@ class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) 
         // This should really be checked on the RPC client side but just double checking it here
         // as well, otherwise we'll end up trying to commit transactions with no output states!
         logger.info("Starting AddNostroTransaction flow...")
+
         newNostroTransactions.forEach { logger.info(it.toString()) }
 
         if (newNostroTransactions.isEmpty()) {
@@ -73,7 +75,7 @@ class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) 
 
         val signedTransaction = serviceHub.signInitialTransaction(unsignedTransaction)
         progressTracker.currentStep = FINALISING
-        val finalisedTransaction = subFlow(FinalityFlow(signedTransaction, FINALISING.childProgressTracker()))
+        val finalisedTransaction = subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>(), FINALISING.childProgressTracker()))
 
         // The flow returns the IDs and timestamps of the last updates for each nostro account so
         // the daemon knows what has been recorded to date.
