@@ -1,22 +1,31 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
     ext.corda_release_version = '4.0-SNAPSHOT'
-    ext.corda_gradle_plugins_version = '4.0.25'
-    ext.kotlin_version = '1.2.51'
+    ext.corda_gradle_plugins_version = '4.0.36'
+    ext.kotlin_version = '1.2.71'
     ext.junit_version = '4.12'
-    ext.quasar_version = '0.7.9'
+    ext.quasar_version = '0.7.10'
     ext.retrofit_version = '2.4.0'
     ext.okhttp_version = '3.9.1'
     ext.retrofit_version = '2.4.0'
     ext.jopt_simple_version = '5.0.2'
     ext.slf4j_version = '1.7.25'
-    ext.log4j_version = '2.9.1'
+    ext.log4j_version = '2.11.1'
+    ext.artifactory_contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
 
     repositories {
         mavenLocal()
         mavenCentral()
         jcenter()
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/list/corda-dev/' }
+        maven {
+            url 'https://kotlin.bintray.com/kotlinx'
+        }
+        maven {
+            url "$artifactory_contextUrl/corda-releases"
+        }
+        maven { 
+            url "$artifactory_contextUrl/list/corda-dev/"
+        }
     }
 
     dependencies {
@@ -101,6 +110,13 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         apiVersion = "1.2"
         jvmTarget = "1.8"
         javaParameters = true   // Useful for reflection.
+    }
+}
+
+cordapp {
+    info {
+        targetPlatformVersion 4
+        minimumPlatformVersion 4
     }
 }
 

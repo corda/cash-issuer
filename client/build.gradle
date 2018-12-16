@@ -68,3 +68,10 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         javaParameters = true   // Useful for reflection.
     }
 }
+
+cordapp {
+    info {
+        targetPlatformVersion 4
+        minimumPlatformVersion 4
+    }
+}
