@@ -17,6 +17,7 @@ import java.util.*
 
 @StartableByRPC
 @StartableByService
+@InitiatingFlow
 class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRedeemCash() {
 
     companion object {
