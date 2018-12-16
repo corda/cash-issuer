@@ -30,12 +30,14 @@ import java.time.Instant
  * TODO This flow should probably be called MatchNostroTransactionFlow
  */
 @StartableByService
+@InitiatingFlow
 class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionState>) : FlowLogic<SignedTransaction>() {
 
     /**
      * Updates the status of the nostro transaction state. Doesn't add anything else. No return type as the builder is
      * mutable.
      */
+    @Suspendable
     private fun createBaseTransaction(builder: TransactionBuilder, newType: NostroTransactionType, newStatus: NostroTransactionStatus) {
         val command = Command(NostroTransactionContract.Match(), listOf(ourIdentity.owningKey))
         val nostroTransactionOutput = stateAndRef.state.data.copy(type = newType, status = newStatus)
@@ -45,6 +47,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
                 .addOutputState(nostroTransactionOutput, NostroTransactionContract.CONTRACT_ID)
     }
 
+    @Suspendable
     private fun addNodeTransactionState(
             builder: TransactionBuilder,
             bankAccountStates: List<StateAndRef<BankAccountState>>,

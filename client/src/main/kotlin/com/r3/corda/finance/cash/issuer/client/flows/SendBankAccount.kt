@@ -22,6 +22,7 @@ class SendBankAccount(val issuer: Party, val linearId: UniqueIdentifier) : Abstr
     companion object {
         object SENDING : ProgressTracker.Step("Sending to issuer.")
 
+        @JvmStatic
         fun tracker() = ProgressTracker(SENDING)
     }
 

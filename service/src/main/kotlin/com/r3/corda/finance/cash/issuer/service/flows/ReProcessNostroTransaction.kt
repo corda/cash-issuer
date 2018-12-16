@@ -5,6 +5,7 @@ import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.utilities.getNostroTransactionsByAccountNumber
 import com.r3.corda.finance.cash.issuer.service.services.UpdateObserverService
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByService
 
 /**
@@ -14,6 +15,7 @@ import net.corda.core.flows.StartableByService
  * access to ThreadLocal<CordaPersistence>.
  */
 @StartableByService
+@InitiatingFlow
 class ReProcessNostroTransaction(val bankAccountState: BankAccountState) : FlowLogic<Unit>() {
 
     @Suspendable

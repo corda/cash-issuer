@@ -18,12 +18,14 @@ import net.corda.core.utilities.ProgressTracker
  */
 @StartableByRPC
 @StartableByService
+@InitiatingFlow
 class AddBankAccount(val bankAccount: BankAccount) : FlowLogic<SignedTransaction>() {
 
     companion object {
         // TODO: Add the rest of the progress tracker.
         object FINALISING : ProgressTracker.Step("Finalising transaction.")
 
+        @JvmStatic
         fun tracker() = ProgressTracker(FINALISING)
     }
 

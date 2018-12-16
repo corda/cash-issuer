@@ -25,6 +25,7 @@ class MoveCash(val recipient: Party, val amount: Amount<Currency>) : FlowLogic<S
         // TODO: Add the rest of the progress tracker.
         object MOVING : ProgressTracker.Step("Moving cash.")
 
+        @JvmStatic
         fun tracker() = ProgressTracker(MOVING)
     }
 

@@ -4,10 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.finance.cash.issuer.common.flows.AbstractRedeemCash
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.PartyAndReference
-import net.corda.core.flows.SendStateAndRefFlow
-import net.corda.core.flows.SignTransactionFlow
-import net.corda.core.flows.StartableByRPC
-import net.corda.core.flows.StartableByService
+import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -19,10 +16,12 @@ import java.util.*
 
 @StartableByRPC
 @StartableByService
+@InitiatingFlow
 class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRedeemCash() {
 
     companion object {
         object REDEEMING : ProgressTracker.Step("Redeeming cash.")
+        @JvmStatic
         fun tracker() = ProgressTracker(REDEEMING)
     }
 

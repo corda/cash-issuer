@@ -7,10 +7,7 @@ import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
 import com.r3.corda.finance.cash.issuer.common.types.toState
 import com.r3.corda.finance.cash.issuer.common.utilities.getNostroTransactionStateByTransactionId
 import net.corda.core.contracts.Command
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.FlowSession
-import net.corda.core.flows.StartableByRPC
+import net.corda.core.flows.*
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import java.time.Instant
@@ -24,6 +21,7 @@ import java.time.Instant
  * daemon process with the transactions which have been committed up to this point.
  */
 @StartableByRPC
+@InitiatingFlow
 class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) : FlowLogic<Map<String, Instant>>() {
 
     companion object {
@@ -32,6 +30,7 @@ class AddNostroTransactions(val newNostroTransactions: List<NostroTransaction>) 
             override fun childProgressTracker() = FinalityFlow.tracker()
         }
 
+        @JvmStatic
         fun tracker() = ProgressTracker(FINALISING)
     }
 
