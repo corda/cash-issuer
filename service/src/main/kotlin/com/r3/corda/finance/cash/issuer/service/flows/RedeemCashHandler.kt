@@ -29,6 +29,7 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         val cashStateAndRefsToRedeem = subFlow(ReceiveStateAndRefFlow<Cash.State>(otherSession))
         val redemptionAmount = otherSession.receive<Amount<Issued<Currency>>>().unwrap { it }
         logger.info("Received cash states to redeem.")
+        logger.info("redemptionAmount: $redemptionAmount")
         // Add create a node transaction state by adding the linearIds of all teh bank account states
         val amount = cashStateAndRefsToRedeem.map { it.state.data }.sumCash()
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
@@ -61,6 +62,6 @@ class RedeemCashHandler(val otherSession: FlowSession) : FlowLogic<SignedTransac
         logger.info(transactionBuilder.toWireTransaction(serviceHub).toString())
         val partiallySignedTransaction = serviceHub.signInitialTransaction(transactionBuilder, serviceHub.keyManagementService.filterMyKeys(signers))
         val signedTransaction = subFlow(CollectSignaturesFlow(partiallySignedTransaction, listOf(otherSession)))
-        return subFlow(FinalityFlow(signedTransaction, emptySet<FlowSession>()))
+        return subFlow(FinalityFlow(signedTransaction, listOf(otherSession)))
     }
 }

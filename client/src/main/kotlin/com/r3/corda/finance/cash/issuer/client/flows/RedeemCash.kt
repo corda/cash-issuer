@@ -29,17 +29,25 @@ class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRede
     @Suspendable
     override fun call() {
         val builder = TransactionBuilder(notary = null)
+        //get unconsumed cash states
         val exitStates = AbstractCashSelection
                 .getInstance { serviceHub.jdbcSession().metaData }
                 .unconsumedCashStatesForSpending(serviceHub, amount, setOf(issuer), builder.notary, builder.lockId, setOf())
         exitStates.forEach { logger.info(it.state.data.toString()) }
-        val session = initiateFlow(issuer)
-        logger.info("Sending states to exit to $issuer")
+
         progressTracker.currentStep = REDEEMING
-        subFlow(SendStateAndRefFlow(session, exitStates))
-        session.send(amount.issuedBy(PartyAndReference(issuer, OpaqueBytes.of(0))))
-        subFlow(object : SignTransactionFlow(session) {
+        val otherSession = initiateFlow(issuer)
+        logger.info("Sending states to exit to $issuer")
+
+        //sign tx
+        subFlow(SendStateAndRefFlow(otherSession, exitStates))
+
+        otherSession.send(amount.issuedBy(PartyAndReference(issuer, OpaqueBytes.of(0))))
+
+        subFlow(object : SignTransactionFlow(otherSession) {
             override fun checkTransaction(stx: SignedTransaction) = Unit
         })
+
+        subFlow(ReceiveFinalityFlow(otherSession))
     }
 }
