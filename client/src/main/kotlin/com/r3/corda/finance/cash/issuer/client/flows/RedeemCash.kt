@@ -10,7 +10,8 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.ProgressTracker
-import net.corda.finance.contracts.asset.cash.selection.AbstractCashSelection
+import net.corda.finance.contracts.asset.AbstractCashSelection
+
 import net.corda.finance.issuedBy
 import java.util.*
 
@@ -33,7 +34,7 @@ class RedeemCash(val amount: Amount<Currency>, val issuer: Party) : AbstractRede
         val exitStates = AbstractCashSelection
                 .getInstance { serviceHub.jdbcSession().metaData }
                 .unconsumedCashStatesForSpending(serviceHub, amount, setOf(issuer), builder.notary, builder.lockId, setOf())
-        exitStates.forEach { logger.info(it.state.data.toString()) }
+        //exitStates.forEach { logger.info(it.state.data.toString()) }
 
         progressTracker.currentStep = REDEEMING
         val otherSession = initiateFlow(issuer)
