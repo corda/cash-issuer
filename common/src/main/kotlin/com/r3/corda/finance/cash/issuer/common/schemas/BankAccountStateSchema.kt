@@ -19,6 +19,8 @@ object BankAccountStateSchemaV1 : MappedSchema(
     class PersistentBankAccountState(
             @Column(name = "owner")
             var owner: String,
+            @Column(name = "verifier")
+            var verifier: String,
             @Column(name = "accountName")
             var accountName: String,
             @Column(name = "accountNumber")
@@ -39,6 +41,7 @@ object BankAccountStateSchemaV1 : MappedSchema(
         @Suppress("UNUSED")
         constructor() : this(
                 owner = "",
+                verifier = "",
                 accountName = "",
                 accountNumber = "",
                 currency = "",

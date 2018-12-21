@@ -78,8 +78,8 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
         if (bankAccountState.owner == services.myInfo.legalIdentities.single()) {
             logger.info("The issuer has just added an account. It can be immediately verified.")
             val transaction = signedTransaction.tx
-            val accountNumber = transaction.outRefsOfType<BankAccountState>().single().state.data.accountNumber
-            services.startFlow(VerifyBankAccount(accountNumber))
+            val linearId = transaction.outRefsOfType<BankAccountState>().single().state.data.linearId
+            services.startFlow(VerifyBankAccount(linearId))
             // TODO We probably need to reprocess here as well...
         } else {
             logger.info("We've received an account from another node.")

@@ -21,29 +21,34 @@ import java.util.*
 @BelongsToContract(BankAccountContract::class)
 data class BankAccountState(
         val owner: Party,
+        val verifier: Party,
         val accountName: String,
         val accountNumber: AccountNumber,
         val currency: Currency,
         val type: BankAccountType,
         val verified: Boolean,
-        override val participants: List<AbstractParty>,
         override val linearId: UniqueIdentifier,
         val lastUpdated: Instant = Instant.now()
 ) : LinearState, QueryableState {
 
     constructor(
             owner: Party,
+            verifier: Party,
             accountId: String,
             accountName: String,
             accountNumber: AccountNumber,
             currency: Currency,
             type: BankAccountType
-    ) : this(owner, accountName, accountNumber, currency, type, false, listOf(owner), UniqueIdentifier(accountId))
+    ) : this(owner, verifier, accountName, accountNumber, currency, type, false, UniqueIdentifier(accountId))
+
+    /** The public keys of the involved parties. */
+    override val participants: List<AbstractParty> get() = listOf(owner, verifier)
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState {
         return when (schema) {
             is BankAccountStateSchemaV1 -> BankAccountStateSchemaV1.PersistentBankAccountState(
                     owner = owner.name.toString(),
+                    verifier = verifier.name.toString(),
                     accountName = accountName,
                     accountNumber = accountNumber.digits,
                     currency = currency.currencyCode,
