@@ -1,23 +1,26 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.getOrThrow
 import java.lang.reflect.InvocationTargetException
 import java.util.*
+import io.github.classgraph.ClassGraph
+
+
 
 private val clientsPackage = "com.r3.corda.finance.cash.issuer.daemon.clients"
 
 data class Balance(val accountId: BankAccountId, val nodeBalance: Amount<Currency>, val bankBalance: Amount<Currency>)
 
 class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemon(services, options) {
-    override fun scanForOpenBankingApiClients(): List<OpenBankingApiClient> {
+    override fun scanForOpenBankingApiClients(): List<OpenBankingApi> {
         println("Scanning the 'clients' package for Open Banking API clients...\n")
-        val fastClasspathScanner = FastClasspathScanner(clientsPackage)
-        return mutableListOf<OpenBankingApiClient>().apply {
-            fastClasspathScanner.matchSubclassesOf(OpenBankingApiClient::class.java) {
+
+        val list = mutableListOf<OpenBankingApi>()
+        ClassGraph().enableAllInfo().whitelistPackages(clientsPackage).scan().use { scanResult ->
+            scanResult.getSubclasses(OpenBankingApiClient::class.java.name).map {
                 if (!it.simpleName.endsWith("Client")) {
                     throw IllegalStateException("Your bank API client's name must be suffixed with \"Client\".")
                 }
@@ -32,16 +35,18 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
                             "client. In addition an associated config file is required for each bank API. E.g. For " +
                             "Monzo a config file called \"monzo.conf\" is required.")
                 }
+
+                println("\t* Loaded $apiName API interface and client.")
                 val apiClient = try {
-                    it.getDeclaredConstructor(String::class.java).newInstance(apiName.toLowerCase())
+                    it.loadClass().getDeclaredConstructor(String::class.java).newInstance(apiName.toLowerCase())
                 } catch (e: InvocationTargetException) {
                     throw RuntimeException("Creating open banking API client failed. The most likely reason is bad credentials. " +
                             "Check your API key. If you don't have a monzo or starling account, then run the daemon in --mock-mode")
                 }
-                println("\t* Loaded $apiName API interface and client.")
-                add(apiClient)
-            }.scan()
-        }.toList()
+                list.add(apiClient as OpenBankingApi)
+            }
+        }
+        return list.toList()
     }
 
     override fun start() {

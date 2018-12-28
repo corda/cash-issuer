@@ -15,10 +15,7 @@ import com.r3.corda.finance.cash.issuer.common.utilities.getPendingRedemptionByN
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowException
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.StartableByService
+import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.time.Instant
@@ -33,12 +30,14 @@ import java.time.Instant
  * TODO This flow should probably be called MatchNostroTransactionFlow
  */
 @StartableByService
+@InitiatingFlow
 class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionState>) : FlowLogic<SignedTransaction>() {
 
     /**
      * Updates the status of the nostro transaction state. Doesn't add anything else. No return type as the builder is
      * mutable.
      */
+    @Suspendable
     private fun createBaseTransaction(builder: TransactionBuilder, newType: NostroTransactionType, newStatus: NostroTransactionStatus) {
         val command = Command(NostroTransactionContract.Match(), listOf(ourIdentity.owningKey))
         val nostroTransactionOutput = stateAndRef.state.data.copy(type = newType, status = newStatus)
@@ -48,6 +47,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
                 .addOutputState(nostroTransactionOutput, NostroTransactionContract.CONTRACT_ID)
     }
 
+    @Suspendable
     private fun addNodeTransactionState(
             builder: TransactionBuilder,
             bankAccountStates: List<StateAndRef<BankAccountState>>,
@@ -168,7 +168,7 @@ class ProcessNostroTransaction(val stateAndRef: StateAndRef<NostroTransactionSta
         }
 
         val stx = serviceHub.signInitialTransaction(builder)
-        return subFlow(FinalityFlow(stx))
+        return subFlow(FinalityFlow(stx, emptySet<FlowSession>()))
     }
 
 }

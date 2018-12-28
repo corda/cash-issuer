@@ -2,6 +2,7 @@ package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.finance.cash.issuer.common.contracts.BankAccountContract
+import com.r3.corda.finance.cash.issuer.common.flows.AbstractVerifyBankAccount
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
 import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByAccountNumber
 import net.corda.core.contracts.Command
@@ -15,11 +16,12 @@ import net.corda.core.transactions.TransactionBuilder
  */
 @StartableByService
 @StartableByRPC
-class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTransaction>() {
+class VerifyBankAccount(val accountNumber: AccountNumber) : AbstractVerifyBankAccount() {
 
     @Suspendable
     override fun call(): SignedTransaction {
         logger.info("Starting VerifyBankAccount flow.")
+
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val bankAccountStateAndRef = getBankAccountStateByAccountNumber(accountNumber, serviceHub)
                 ?: throw FlowException("Bank account $accountNumber not found.")
@@ -28,6 +30,8 @@ class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTran
         if (bankAccountState.verified) {
             throw FlowException("Bank account $accountNumber is already verified.")
         }
+
+        val ownerSsession = initiateFlow(bankAccountState.owner)
 
         logger.info("Updating verified flag for ${bankAccountState.accountNumber}.")
         val updatedBankAccountState = bankAccountState.copy(verified = true)
@@ -38,7 +42,8 @@ class VerifyBankAccount(val accountNumber: AccountNumber) : FlowLogic<SignedTran
                 .addOutputState(updatedBankAccountState, BankAccountContract.CONTRACT_ID)
         val stx = serviceHub.signInitialTransaction(utx)
         // Share the updated bank account state with the owner.
-        return subFlow(FinalityFlow(stx, setOf(bankAccountState.owner)))
+        val sessionsForFinality = if (serviceHub.myInfo.isLegalIdentity(bankAccountState.owner)) emptyList() else listOf(ownerSsession)
+        return subFlow(FinalityFlow(stx, sessionsForFinality))
     }
 
 }

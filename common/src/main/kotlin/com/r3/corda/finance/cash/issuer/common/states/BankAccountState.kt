@@ -1,8 +1,10 @@
 package com.r3.corda.finance.cash.issuer.common.states
 
+import com.r3.corda.finance.cash.issuer.common.contracts.BankAccountContract
 import com.r3.corda.finance.cash.issuer.common.schemas.BankAccountStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.types.AccountNumber
 import com.r3.corda.finance.cash.issuer.common.types.BankAccountType
+import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -16,6 +18,7 @@ import java.util.*
 // TODO: Maybe change verified property to whitelisted.
 // The same principle applies to all accounts, customers and issuers.
 // Only match transactions once the accounts have been verified/whitelisted.
+@BelongsToContract(BankAccountContract::class)
 data class BankAccountState(
         val owner: Party,
         val accountName: String,

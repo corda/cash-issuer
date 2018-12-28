@@ -83,6 +83,7 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
             // TODO We probably need to reprocess here as well...
         } else {
             logger.info("We've received an account from another node.")
+            //TODO probably reprocess after verification...
             services.startFlow(ReProcessNostroTransaction(bankAccountState))
         }
     }
@@ -109,11 +110,11 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
         when {
             isMatched && isIssuance -> {
                 logger.info("Issuing cash!")
-                services.startFlow(IssueCash(signedTransaction))
+                services.startTrackedFlow(IssueCash(signedTransaction))
             }
             isMatched && isRedemption -> {
                 logger.info("Processing redemption payment...")
-                services.startFlow(ProcessRedemptionPayment(signedTransaction))
+                services.startTrackedFlow(ProcessRedemptionPayment(signedTransaction))
             }
         }
     }

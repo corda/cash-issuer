@@ -13,8 +13,7 @@
         <Console name="Console-Appender" target="SYSTEM_OUT">
             <PatternLayout>
                 <pattern>
-                    %highlight{%level{length=1} %d{HH:mm:ss} %T %c{1}.%M - %msg%n}{INFO=white,WARN=red,FATAL=bright red
-                    blink}
+                    %highlight{%level{length=1} %d{HH:mm:ss} %T %c{1}.%M - %msg%n}{INFO=white,WARN=red,FATAL=bright red blink}
                 </pattern>>
             </PatternLayout>
         </Console>

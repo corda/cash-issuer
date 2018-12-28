@@ -1,9 +1,11 @@
 package com.r3.corda.finance.cash.issuer.common.states
 
+import com.r3.corda.finance.cash.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.finance.cash.issuer.common.schemas.NodeTransactionStateSchemaV1
 import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionStatus
 import com.r3.corda.finance.cash.issuer.common.types.NodeTransactionType
 import net.corda.core.contracts.AmountTransfer
+import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -14,6 +16,7 @@ import net.corda.core.schemas.QueryableState
 import java.time.Instant
 import java.util.*
 
+@BelongsToContract(NodeTransactionContract::class)
 data class NodeTransactionState(
         val amountTransfer: AmountTransfer<Currency, Party>,
         val createdAt: Instant,
