@@ -1,0 +1,19 @@
+Party A >>>
+// Add first bank account for Roger (see mock data)
+flow start AddBankAccount bankAccount: { accountId: "12345", accountName: "Roger's Account", accountNumber: { sortCode: "442200" , accountNumber: "13371337", type: "uk" }, currency: "GBP" }, verifier: Issuer
+
+// get linear ID of the bank account state which has just been added
+run vaultQuery contractStateType: com.r3.corda.finance.cash.issuer.common.states.BankAccountState
+
+//check Cash
+run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State
+
+//Redeem Cash
+flow start RedeemCash issuer: Issuer, amount: { quantity: 1000, displayTokenSize: 0.01, token: "GBP" }
+
+
+// Add second bank account for David (see mock data)
+flow start AddBankAccount bankAccount: { accountId: "54321", accountName: "David's Account", accountNumber: { sortCode: "873456" , accountNumber: "12345678", type: "uk" }, currency: "GBP" }, verifier: Issuer
+
+// send bank account to issuer
+flow start SendBankAccount issuer: Issuer, linearId: "f5e08fc1-c150-4b08-a2df-9da0a173ea49"

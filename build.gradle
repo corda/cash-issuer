@@ -12,6 +12,7 @@ buildscript {
     ext.slf4j_version = '1.7.25'
     ext.log4j_version = '2.11.1'
     ext.artifactory_contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
+    ext.springBootVersion = '2.1.1.RELEASE'
 
     repositories {
         mavenLocal()
