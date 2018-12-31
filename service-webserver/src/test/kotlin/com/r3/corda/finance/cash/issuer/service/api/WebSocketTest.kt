@@ -1,4 +1,4 @@
-package net.corda.servicewebserver
+package com.r3.corda.finance.cash.issuer.service.api
 
 import org.springframework.messaging.converter.StringMessageConverter
 import org.springframework.messaging.simp.stomp.StompFrameHandler

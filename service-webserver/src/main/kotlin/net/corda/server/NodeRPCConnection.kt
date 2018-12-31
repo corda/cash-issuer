@@ -1,4 +1,4 @@
-package net.corda.servicewebserver
+package net.corda.server
 
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.client.rpc.CordaRPCConnection

@@ -1,4 +1,4 @@
-package net.corda.servicewebserver
+package net.corda.server
 
 import org.junit.Test
 import org.junit.runner.RunWith

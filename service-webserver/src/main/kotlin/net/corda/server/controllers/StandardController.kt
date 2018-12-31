@@ -1,8 +1,8 @@
-package net.corda.servicewebserver.controllers
+package net.corda.server.controllers
 
 import net.corda.core.contracts.ContractState
 import net.corda.core.messaging.vaultQueryBy
-import net.corda.servicewebserver.NodeRPCConnection
+import net.corda.server.NodeRPCConnection
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

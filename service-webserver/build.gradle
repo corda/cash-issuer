@@ -70,7 +70,7 @@ dependencies {
 
 task runIssuerServer(type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
-	main = 'net.corda.servicewebserver.ServiceWebserverApplicationKt'
+	main = 'net.corda.server.ServiceWebserverApplicationKt'
 	//environment "server.port", "8080"
 	//environment "config.rpc.port", "10006"
 }

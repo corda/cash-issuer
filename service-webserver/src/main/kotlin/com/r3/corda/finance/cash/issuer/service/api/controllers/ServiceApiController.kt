@@ -1,4 +1,4 @@
-package net.corda.servicewebserver.controllers
+package com.r3.corda.finance.cash.issuer.service.api.controllers
 
 import com.google.gson.Gson
 import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccountFlow.AddBankAccount
@@ -13,11 +13,13 @@ import com.r3.corda.finance.cash.issuer.service.api.model.toUiModel
 import com.r3.corda.finance.cash.issuer.service.flows.GetNostroAccountBalances
 import com.r3.corda.finance.cash.issuer.service.flows.VerifyBankAccount
 import com.r3.corda.finance.cash.issuer.service.helpers.getBigDecimalFromLong
-import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.messaging.*
+import net.corda.core.messaging.startFlow
+import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.messaging.vaultQueryBy
+import net.corda.core.messaging.vaultTrackBy
 import net.corda.core.node.services.IdentityService
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.QueryCriteria
@@ -26,17 +28,15 @@ import net.corda.core.utilities.loggerFor
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.contracts.getCashBalance
 import net.corda.finance.contracts.getCashBalances
-import net.corda.servicewebserver.NodeRPCConnection
+import net.corda.server.NodeRPCConnection
 import org.slf4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.messaging.simp.annotation.SubscribeMapping
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.util.*
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
 
 val SERVICE_NAMES = listOf("Notary", "Network Map Service")
 
@@ -53,12 +53,15 @@ class ServiceApiController(
 
     companion object {
         private val logger: Logger = loggerFor<ServiceApiController>()
-        private val gson = Gson()
     }
 
-    // Upon creation, the controller starts streaming information on new Yo states to a websocket.
-    // The front-end can subscribe to this websocket to be notified of updates.
-    init {
+    /**
+     *  streaming information on creation/update NostroTransactionState states to a websocket
+     *  The front-end can subscribe to this websocket to be notified of updates.
+     *  /stomp/nostro-transaction
+     */
+    @SubscribeMapping("nostro-transactions")
+    fun subscribeNostroTransactions() {
         val nostroTransactionsFeed = rpc.proxy.vaultTrackBy<NostroTransactionState>().updates
         nostroTransactionsFeed.subscribe { update ->
             update.produced.forEach { (state) ->
@@ -66,7 +69,15 @@ class ServiceApiController(
                 template.convertAndSend("/nostro-transactions", modelUI.toJson())
             }
         }
+    }
 
+    /**
+     *  streaming information on creation/update NodeTransactionState states to a websocket
+     *  The front-end can subscribe to this websocket to be notified of updates.
+     *  /stomp/node-transactions
+     */
+    @SubscribeMapping("node-transactions")
+    fun subscribeNodeTransactions() {
         val nodeTransactionsFeed = rpc.proxy.vaultTrackBy<NodeTransactionState>().updates
         nodeTransactionsFeed.subscribe { update ->
             update.produced.forEach { (state) ->
@@ -186,7 +197,7 @@ class ServiceApiController(
     @PutMapping("/verify-account")
     fun verifyBankAccount(@RequestParam("internalAccountId") internalAccountId: String?): ResponseEntity<String> {
         if (internalAccountId.isNullOrEmpty()) {
-            return ResponseEntity.badRequest().eTag("Query parameter 'linearId' missing or has wrong format.\n").build()
+            return ResponseEntity.badRequest().eTag("Query parameter 'internalAccountId' missing or has wrong format.\n").build()
         }
 
         return try {
