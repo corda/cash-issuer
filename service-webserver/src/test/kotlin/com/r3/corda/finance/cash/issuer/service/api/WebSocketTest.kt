@@ -71,7 +71,7 @@ fun main(args: Array<String>) {
 
     val url = "ws://127.0.0.1:10015/stomp"
     val sessionHandler = MyStompSessionHandler()
-    val future = stompClient.connect(url, sessionHandler)
+    stompClient.connect(url, sessionHandler)
     //block and monitor exit action
     monitorExit()
 }

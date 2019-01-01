@@ -68,6 +68,15 @@ dependencies {
 	cordapp project(":service")
 }
 
+bootJar {
+	baseName = 'service-webserver'
+	version =  '0.1.0'
+	mainClassName = 'net.corda.server.ServiceWebserverApplicationKt'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 task runIssuerServer(type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	main = 'net.corda.server.ServiceWebserverApplicationKt'
