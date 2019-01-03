@@ -1,6 +1,6 @@
 package com.r3.corda.finance.cash.issuer
 
-import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccount
+import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccountFlow.AddBankAccount
 import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
 import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
 import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
@@ -384,7 +384,7 @@ class AddBankAccountView : Fragment("Cash Issuer") {
                             accountNumber = ukAccountNumber,
                             currency = Currency.getInstance(model.currency.value)
                     )
-                    cordaRPCOps.startFlow(::AddBankAccount, bankAccount)
+                    cordaRPCOps.startFlow(::AddBankAccount, bankAccount, cordaRPCOps.nodeInfo().legalIdentities.first())
                 }
             }
         }

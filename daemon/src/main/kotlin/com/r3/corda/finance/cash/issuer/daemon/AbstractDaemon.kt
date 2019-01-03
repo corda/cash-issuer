@@ -1,6 +1,6 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
-import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccount
+import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccountFlow
 import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
 import com.r3.corda.finance.cash.issuer.service.flows.GetLastUpdatesByAccountId
 import com.r3.corda.finance.cash.issuer.service.flows.GetNostroAccountBalances
@@ -12,7 +12,6 @@ import net.corda.core.utilities.loggerFor
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
-import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
 abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: CommandLineOptions) {
@@ -75,7 +74,7 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
         allAccounts.forEach {
             val accountNumber = it.accountNumber as UKAccountNumber
             try {
-                services.startFlowDynamic(AddBankAccount::class.java, it).returnValue.getOrThrow()
+                services.startFlowDynamic(AddBankAccountFlow.AddBankAccount::class.java, it, services.nodeInfo().legalIdentities.first()).returnValue.getOrThrow()
                 println("\t* Added bank account with $accountNumber.")
             } catch (e: CordaRuntimeException) {
                 println("\t* Bank account with $accountNumber has already been added.")

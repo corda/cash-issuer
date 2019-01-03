@@ -14,6 +14,6 @@ data class BankAccount(
         val type: BankAccountType = BankAccountType.COLLATERAL // Defaulted to collateral for now.
 )
 
-fun BankAccount.toState(owner: Party): BankAccountState {
-    return BankAccountState(owner, accountId, accountName, accountNumber, currency, type)
+fun BankAccount.toState(owner: Party, verifier: Party): BankAccountState {
+    return BankAccountState(owner, verifier, accountId, accountName, accountNumber, currency, type)
 }
