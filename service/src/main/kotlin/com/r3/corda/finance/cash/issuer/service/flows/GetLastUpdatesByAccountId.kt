@@ -1,7 +1,7 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.finance.cash.issuer.common.utilities.getLatestNostroTransactionStatesGroupedByAccount
+import com.r3.corda.sdk.issuer.common.workflows.utilities.getLatestNostroTransactionStatesGroupedByAccount
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
 

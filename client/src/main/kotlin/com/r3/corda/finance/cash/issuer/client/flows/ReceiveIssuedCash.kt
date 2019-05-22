@@ -1,10 +1,11 @@
 package com.r3.corda.finance.cash.issuer.client.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.finance.cash.issuer.common.flows.AbstractIssueCash
-import net.corda.core.flows.*
-import net.corda.core.node.StatesToRecord
-import net.corda.core.transactions.SignedTransaction
+import com.r3.corda.sdk.issuer.common.workflows.flows.AbstractIssueCash
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
+import net.corda.core.flows.InitiatedBy
+import net.corda.core.flows.ReceiveFinalityFlow
 
 @InitiatedBy(AbstractIssueCash::class)
 class ReceiveIssuedCash(val otherSession: FlowSession) : FlowLogic<Unit>() {

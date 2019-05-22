@@ -1,9 +1,9 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.finance.cash.issuer.common.contracts.BankAccountContract
-import com.r3.corda.finance.cash.issuer.common.flows.VerifyBankAccountFlow
-import com.r3.corda.finance.cash.issuer.common.utilities.getBankAccountStateByLinearId
+import com.r3.corda.sdk.issuer.common.contracts.BankAccountContract
+import com.r3.corda.sdk.issuer.common.workflows.flows.AbstractVerifyBankAccount
+import com.r3.corda.sdk.issuer.common.workflows.utilities.getBankAccountStateByLinearId
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FinalityFlow
@@ -19,17 +19,16 @@ import net.corda.core.transactions.TransactionBuilder
  */
 @StartableByService
 @StartableByRPC
-class VerifyBankAccount(val linearId: UniqueIdentifier) : VerifyBankAccountFlow.AbstractVerifyBankAccount() {
-
+class VerifyBankAccount(
+        val linearId: UniqueIdentifier
+) : AbstractVerifyBankAccount() {
     @Suspendable
     override fun call(): SignedTransaction {
         logger.info("Starting VerifyBankAccount flow.")
-
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val bankAccountStateAndRef = getBankAccountStateByLinearId(linearId, serviceHub)
-                ?: throw FlowException("Bank account by linearId $linearId not found.")
+                ?: throw FlowException("Bank account with linearId $linearId not found.")
 
-        //TODO move validation into BankAccountContract.verify
         val bankAccountState = bankAccountStateAndRef.state.data
         if (bankAccountState.verified) {
             throw FlowException("Bank account ${bankAccountState.accountNumber} is already verified.")
@@ -40,16 +39,15 @@ class VerifyBankAccount(val linearId: UniqueIdentifier) : VerifyBankAccountFlow.
         logger.info("Updating verified flag for ${bankAccountState.accountNumber}.")
         val updatedBankAccountState = bankAccountState.copy(verified = true)
         val command = Command(BankAccountContract.Update(), listOf(ourIdentity.owningKey))
-        val utx = TransactionBuilder(notary = notary)
-                .addInputState(bankAccountStateAndRef)
-                .addCommand(command)
-                .addOutputState(updatedBankAccountState, BankAccountContract.CONTRACT_ID)
+        val utx = TransactionBuilder(notary = notary).apply {
+            addInputState(bankAccountStateAndRef)
+            addCommand(command)
+            addOutputState(updatedBankAccountState)
+        }
 
+        // Sign with legal identity key.
         val stx = serviceHub.signInitialTransaction(utx)
-
-        // Share the updated bank account state with the owner.
-        val sessionsForFinality = if (serviceHub.myInfo.isLegalIdentity(bankAccountState.owner)) emptyList() else listOf(ownerSsession)
-        return subFlow(FinalityFlow(stx, sessionsForFinality))
+        val sessions = if (serviceHub.myInfo.isLegalIdentity(bankAccountState.owner)) emptyList() else listOf(ownerSsession)
+        return subFlow(FinalityFlow(stx, sessions))
     }
-
 }

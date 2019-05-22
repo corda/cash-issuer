@@ -1,13 +1,12 @@
 package com.r3.corda.finance.cash.issuer.daemon.mock
 
-import com.r3.corda.finance.cash.issuer.common.types.BankAccount
-import com.r3.corda.finance.cash.issuer.common.types.NostroTransaction
-import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
-import com.r3.corda.finance.cash.issuer.common.utilities.*
+import com.r3.corda.sdk.issuer.common.contracts.types.BankAccount
+import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
+import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
+import com.r3.corda.sdk.issuer.common.workflows.utilities.*
+import com.r3.corda.sdk.token.money.GBP
 import net.corda.core.internal.randomOrNull
-import net.corda.finance.GBP
 import java.time.Instant
-import java.util.*
 
 interface MockClient {
     val transactions: MutableList<NostroTransaction>
@@ -77,18 +76,17 @@ fun mockTransactionGenerator(
 
         // Tx data.
         val nextId = "tx_00009${generateRandomString(16)}"
-        val gbp = Currency.getInstance("GBP")
         val type = "payport_faster_payments"
         val description = "dummy description for now..."
         val now = Instant.now()
 
         val nostroTransaction = if (amount > 0L) {
-            NostroTransaction(nextId, mockApi.account.accountId, amount, gbp, type, description, now,
+            NostroTransaction(nextId, mockApi.account.accountId, amount, GBP, type, description, now,
                     source = contact.accountNumber,
                     destination = mockApi.account.accountNumber
             )
         } else {
-            NostroTransaction(nextId, mockApi.account.accountId, amount, gbp, type, description, now,
+            NostroTransaction(nextId, mockApi.account.accountId, amount, GBP, type, description, now,
                     source = mockApi.account.accountNumber,
                     destination = contact.accountNumber
             )

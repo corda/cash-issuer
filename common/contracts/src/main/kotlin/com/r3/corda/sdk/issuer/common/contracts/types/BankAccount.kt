@@ -1,0 +1,19 @@
+package com.r3.corda.sdk.issuer.common.contracts.types
+
+import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
+import com.r3.corda.sdk.token.money.FiatCurrency
+import net.corda.core.identity.Party
+import net.corda.core.serialization.CordaSerializable
+
+@CordaSerializable
+data class BankAccount(
+        val accountId: String,
+        val accountName: String,
+        val accountNumber: AccountNumber,
+        val currency: FiatCurrency,
+        val type: BankAccountType = BankAccountType.COLLATERAL // Defaulted to collateral for now.
+)
+
+fun BankAccount.toState(owner: Party, verifier: Party): BankAccountState {
+    return BankAccountState(owner, verifier, accountId, accountName, accountNumber, currency, type)
+}

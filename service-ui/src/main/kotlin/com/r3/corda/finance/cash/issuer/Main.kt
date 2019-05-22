@@ -1,10 +1,11 @@
 package com.r3.corda.finance.cash.issuer
 
-import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccountFlow.AddBankAccount
-import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
-import com.r3.corda.finance.cash.issuer.common.states.NodeTransactionState
-import com.r3.corda.finance.cash.issuer.common.states.NostroTransactionState
-import com.r3.corda.finance.cash.issuer.common.types.*
+import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
+import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
+import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
+import com.r3.corda.sdk.issuer.common.contracts.types.*
+import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
+import com.r3.corda.sdk.token.money.FiatCurrency
 import javafx.application.Application
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleStringProperty
@@ -36,7 +37,7 @@ class BankAccountUiModel(
         externalAccountId: String,
         accountName: String,
         accountNumber: AccountNumber,
-        currency: Currency,
+        currency: FiatCurrency,
         type: BankAccountType,
         verified: Boolean,
         lastUpdated: Instant
@@ -57,7 +58,7 @@ class NostroTransactionUiModel(
         internalTransactionId: UUID,
         accountId: String,
         amount: Long,
-        currency: Currency,
+        currency: FiatCurrency,
         source: AccountNumber,
         destination: AccountNumber,
         createdAt: Instant,
@@ -80,7 +81,7 @@ class NostroTransactionUiModel(
 class NodeTransactionUiModel(
         transactionId: UUID,
         amount: Long,
-        currency: Currency,
+        currency: FiatCurrency,
         source: Party,
         notes: String,
         destination: Party,
@@ -382,7 +383,7 @@ class AddBankAccountView : Fragment("Cash Issuer") {
                             accountId = model.accountId.value,
                             accountName = model.accountName.value,
                             accountNumber = ukAccountNumber,
-                            currency = Currency.getInstance(model.currency.value)
+                            currency = FiatCurrency.getInstance(model.currency.value)
                     )
                     cordaRPCOps.startFlow(::AddBankAccount, bankAccount, cordaRPCOps.nodeInfo().legalIdentities.first())
                 }

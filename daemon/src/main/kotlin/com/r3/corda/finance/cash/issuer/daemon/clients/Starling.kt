@@ -1,11 +1,12 @@
 package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.r3.corda.finance.cash.issuer.common.types.*
 import com.r3.corda.finance.cash.issuer.daemon.BankAccountId
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiClient
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiFactory
 import com.r3.corda.finance.cash.issuer.daemon.getOrThrow
+import com.r3.corda.sdk.issuer.common.contracts.types.*
+import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -17,7 +18,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 interface Starling {
     @GET("accounts")
@@ -59,7 +59,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
         return listOf(account.toBankAccount())
     }
 
-    override fun balance(accountId: BankAccountId?): Amount<Currency> {
+    override fun balance(accountId: BankAccountId?): Amount<FiatCurrency> {
         val balance = api.balance().getOrThrow()
         // Amounts require cent/pence values.
         return Amount((balance.amount * 100.toBigDecimal()).longValueExact(), balance.currency)
@@ -140,7 +140,7 @@ class StarlingClient(configName: String) : OpenBankingApiClient(configName) {
 data class StarlingAccount(
         val bic: String, // Not yet used.
         val createdAt: Instant,
-        val currency: Currency,
+        val currency: FiatCurrency,
         val iban: String, // Not yet used.
         val id: String,
         val name: String,
@@ -160,7 +160,7 @@ fun StarlingAccount.toBankAccount(): BankAccount {
 data class StarlingBalance(
         val amount: BigDecimal,
         val clearedBalance: BigDecimal,
-        val currency: Currency,
+        val currency: FiatCurrency,
         val effectiveBalance: BigDecimal,
         val pendingTransactions: BigDecimal
 )
@@ -190,7 +190,7 @@ data class StarlingTransactions(val transactions: List<StarlingTransaction>)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class StarlingTransaction(
         val id: String,
-        val currency: Currency,
+        val currency: FiatCurrency,
         val amount: BigDecimal,
         val direction: String,
         val created: Instant,
