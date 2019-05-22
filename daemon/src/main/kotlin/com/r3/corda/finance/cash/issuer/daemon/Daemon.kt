@@ -1,18 +1,15 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
-import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
+import com.r3.corda.sdk.token.money.FiatCurrency
+import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.utilities.getOrThrow
 import java.lang.reflect.InvocationTargetException
-import java.util.*
-import io.github.classgraph.ClassGraph
-
 
 
 private val clientsPackage = "com.r3.corda.finance.cash.issuer.daemon.clients"
 
-data class Balance(val accountId: BankAccountId, val nodeBalance: Amount<Currency>, val bankBalance: Amount<Currency>)
+data class Balance(val accountId: BankAccountId, val nodeBalance: Amount<FiatCurrency>, val bankBalance: Amount<FiatCurrency>)
 
 class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemon(services, options) {
     override fun scanForOpenBankingApiClients(): List<OpenBankingApi> {
@@ -49,24 +46,4 @@ class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemo
         return list.toList()
     }
 
-    override fun start() {
-        subscriber = transactionsFeed.subscribe {
-            if (it.isNotEmpty()) {
-                println("Adding ${it.size} nostro transactions to the issuer node.")
-                val addedTransactions = services.startFlowDynamic(AddNostroTransactions::class.java, it).returnValue.getOrThrow()
-                addedTransactions.forEach { accountId, timestamp ->
-                    // Update the last stored transaction timestamp.
-                    accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp.toEpochMilli())
-                    val bankApiName = accountsToBank[accountId]!!::class.java.simpleName
-                    println("Updated $accountId for $bankApiName with the last seen timestamp $timestamp.")
-                }
-            } else {
-                logger.info("Grabbed no transactions.")
-            }
-        }
-    }
-
-    override fun stop() {
-        subscriber?.unsubscribe()
-    }
 }

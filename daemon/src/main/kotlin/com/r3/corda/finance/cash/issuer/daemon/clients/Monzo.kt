@@ -1,15 +1,15 @@
 package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.r3.corda.finance.cash.issuer.common.types.*
 import com.r3.corda.finance.cash.issuer.daemon.*
+import com.r3.corda.sdk.issuer.common.contracts.types.*
+import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Query
 import rx.Observable
 import rx.schedulers.Schedulers
 import java.time.Instant
-import java.util.*
 
 interface Monzo {
     @GET("/accounts")
@@ -55,7 +55,7 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
         }
     }
 
-    override fun balance(accountId: BankAccountId?): Amount<Currency> {
+    override fun balance(accountId: BankAccountId?): Amount<FiatCurrency> {
         if (accountId == null) throw IllegalArgumentException("AccountId is required for Monzo::balance.")
         val balance = wrapWithTry { api.balance(accountId).getOrThrow() }
         return Amount(balance.balance, balance.currency)
@@ -94,13 +94,13 @@ data class MonzoAccount(
         val sort_code: String?
 )
 
-fun MonzoAccount.toBankAccount(currency: Currency): BankAccount {
+fun MonzoAccount.toBankAccount(currency: FiatCurrency): BankAccount {
     val accountNumber = if (account_number == null || sort_code == null) NoAccountNumber() else UKAccountNumber(sort_code, account_number)
     return BankAccount(id, description, accountNumber, currency)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class MonzoBalance(val balance: Long, val currency: Currency)
+data class MonzoBalance(val balance: Long, val currency: FiatCurrency)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MonzoCounterparty(
@@ -115,7 +115,7 @@ data class MonzoTransaction(
         val account_id: String,
         val amount: Long,
         val created: Instant,
-        val currency: Currency,
+        val currency: FiatCurrency,
         val description: String,
         val id: String,
         val notes: String,

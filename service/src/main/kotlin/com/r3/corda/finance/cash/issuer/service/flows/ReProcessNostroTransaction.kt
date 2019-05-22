@@ -1,16 +1,16 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.finance.cash.issuer.common.states.BankAccountState
-import com.r3.corda.finance.cash.issuer.common.utilities.getNostroTransactionsByAccountNumber
 import com.r3.corda.finance.cash.issuer.service.services.UpdateObserverService
+import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
+import com.r3.corda.sdk.issuer.common.workflows.utilities.getNostroTransactionsByAccountNumber
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByService
 
 /**
  * A flow to decide which nostro transactions to re-process when a new bank account state is received. This workflow
- * cannot be performed in the [UpdateObserverService] which seems to be the natural palce for it... This is because
+ * cannot be performed in the [UpdateObserverService] which seems to be the natural place for it... This is because
  * the [UpdateObserverService] observes updates from the vault on the [Schedulers.io] thread pool which doesn't have
  * access to ThreadLocal<CordaPersistence>.
  */

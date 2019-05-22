@@ -1,9 +1,10 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
-import com.r3.corda.finance.cash.issuer.common.flows.AddBankAccountFlow
-import com.r3.corda.finance.cash.issuer.common.types.UKAccountNumber
+import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.finance.cash.issuer.service.flows.GetLastUpdatesByAccountId
 import com.r3.corda.finance.cash.issuer.service.flows.GetNostroAccountBalances
+import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
+import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
 import net.corda.core.CordaRuntimeException
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
@@ -15,9 +16,12 @@ import rx.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: CommandLineOptions) {
+
+    var started: Boolean = false
+
     protected val autoStart: Boolean = cmdLineOptions.autoMode
 
-    protected val openBankingApiClients: List<OpenBankingApi> by lazy {
+    val openBankingApiClients: List<OpenBankingApi> by lazy {
         try {
             scanForOpenBankingApiClients()
         } catch (e: RuntimeException) {
@@ -36,9 +40,10 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
         }
     }
 
-    protected var subscriber: Subscription? = null
-    protected val transactionsFeed = Observable
+    private var subscriber: Subscription? = null
+    private val transactionsFeed = Observable
             .interval(5, TimeUnit.SECONDS, Schedulers.io())
+            .startWith(1)
             .flatMap { Observable.merge(openBankingApiClients.map(OpenBankingApi::transactionsFeed)) }
             .doOnError { println(it.message) }
 
@@ -58,9 +63,29 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
         }
     }
 
-    abstract fun start()
+    open fun start() {
+        println("Starting...")
+        subscriber = transactionsFeed.subscribe {
+            if (it.isNotEmpty()) {
+                println("Adding ${it.size} nostro transactions to the issuer node.")
+                val addedTransactions = services.startFlowDynamic(AddNostroTransactions::class.java, it).returnValue.getOrThrow()
+                addedTransactions.forEach { accountId, timestamp ->
+                    // Update the last stored transaction timestamp.
+                    accountsToBank[accountId]?.updateLastTransactionTimestamps(accountId, timestamp.toEpochMilli())
+                    val bankApiName = accountsToBank[accountId]!!::class.java.simpleName
+                    println("Updated $accountId for $bankApiName with the last seen timestamp $timestamp.")
+                }
+            } else {
+                logger.info("Grabbed no transactions.")
+            }
+        }
+        started = true
+    }
 
-    abstract fun stop()
+    open fun stop() {
+        subscriber?.unsubscribe()
+        started = false
+    }
 
     companion object {
         val logger = loggerFor<Daemon>()
@@ -74,7 +99,7 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
         allAccounts.forEach {
             val accountNumber = it.accountNumber as UKAccountNumber
             try {
-                services.startFlowDynamic(AddBankAccountFlow.AddBankAccount::class.java, it, services.nodeInfo().legalIdentities.first()).returnValue.getOrThrow()
+                services.startFlowDynamic(AddBankAccount::class.java, it, services.nodeInfo().legalIdentities.first()).returnValue.getOrThrow()
                 println("\t* Added bank account with $accountNumber.")
             } catch (e: CordaRuntimeException) {
                 println("\t* Bank account with $accountNumber has already been added.")
