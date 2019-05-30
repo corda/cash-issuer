@@ -1,0 +1,43 @@
+buildscript{
+    dependencies{
+        classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+apply plugin: 'net.corda.plugins.quasar-utils'
+
+group 'com.r3.corda.finance.issuer'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "$corda_release_group:corda-core:$corda_release_version"
+    testCompile "$corda_release_group:corda-jackson:$corda_release_version"
+    testCompile "$corda_release_group:corda-rpc:$corda_release_version"
+    testCompile "$corda_release_group:corda-node-api:$corda_release_version"
+    testCompile "$corda_release_group:corda:$corda_release_version"
+
+    // For testing.
+    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "junit:junit:$junit_version"
+
+
+    testCompile project(":common:contracts")
+    testCompile project(":common:workflows")
+    testCompile project(":service")
+    testCompile project(":client")
+    testCompile "com.r3.tokens-sdk:contract:1.0-RC01"
+    testCompile "com.r3.tokens-sdk:money:1.0-RC01"
+    testCompile "com.r3.tokens-sdk:workflow:1.0-RC01"
+}

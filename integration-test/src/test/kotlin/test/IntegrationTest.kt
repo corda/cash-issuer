@@ -1,6 +1,5 @@
-package com.r3.test
+package test
 
-import com.r3.corda.finance.cash.issuer.daemon.getOrThrow
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
@@ -28,6 +27,8 @@ import net.corda.testing.driver.NodeParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import org.junit.Test
+import rx.Observable
+import rx.schedulers.Schedulers
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import kotlin.test.assertEquals
@@ -226,3 +227,7 @@ class IntegrationTest {
 
     }
 }
+
+fun <T : Any> Observable<T>.getOrThrow() = observeOn(Schedulers.io())
+        .toFuture()
+        .getOrThrow()
