@@ -37,7 +37,7 @@ dependencies {
     testCompile project(":common:workflows")
     testCompile project(":service")
     testCompile project(":client")
-    testCompile "com.r3.tokens-sdk:contract:1.0-RC01"
-    testCompile "com.r3.tokens-sdk:money:1.0-RC01"
-    testCompile "com.r3.tokens-sdk:workflow:1.0-RC01"
+    testCompile "com.r3.tokens-sdk:contract:$tokens_sdk_version"
+    testCompile "com.r3.tokens-sdk:money:$tokens_sdk_version"
+    testCompile "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
 }

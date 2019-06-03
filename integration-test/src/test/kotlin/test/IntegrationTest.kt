@@ -1,5 +1,6 @@
 package test
 
+import com.r3.corda.finance.cash.issuer.client.flows.RedeemCash
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
@@ -9,14 +10,11 @@ import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
 import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
+import com.r3.corda.sdk.issuer.common.workflows.flows.MoveCash
 import com.r3.corda.sdk.token.contracts.states.FungibleToken
 import com.r3.corda.sdk.token.money.GBP
-import com.r3.corda.sdk.token.workflow.flows.redeem.RedeemToken
-import com.r3.corda.sdk.token.workflow.flows.shell.ConfidentialMoveFungibleTokens
-import com.r3.corda.sdk.token.workflow.types.PartyAndAmount
 import net.corda.core.contracts.ContractState
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
 import net.corda.core.messaging.startFlow
 import net.corda.core.toFuture
 import net.corda.core.utilities.contextLogger
@@ -109,9 +107,23 @@ class IntegrationTest {
                     type = "",
                     description = "",
                     createdAt = Instant.now(),
-                    source = UKAccountNumber(sortCode = "112233", accountNumber = "44557788"),
+                    source = UKAccountNumber(sortCode = "112233", accountNumber = "44557788"),      // Party A.
                     destination = UKAccountNumber(sortCode = "224466", accountNumber = "11228899")
             )
+
+            fun generatePaymentFromIssuerNostro(secretCode: String): NostroTransaction {
+                return NostroTransaction(
+                        transactionId = "2",
+                        accountId = "1",
+                        amount = -200L,
+                        currency = GBP,
+                        type = "",
+                        description = secretCode,
+                        createdAt = Instant.now(),
+                        source = UKAccountNumber(sortCode = "224466", accountNumber = "11228899"),
+                        destination = UKAccountNumber(sortCode = "996633", accountNumber = "11663300")  // Party B.
+                )
+            }
 
             val issuerParty = I.nodeInfo.legalIdentities.first()
             val aParty = A.nodeInfo.legalIdentities.first()
@@ -162,6 +174,7 @@ class IntegrationTest {
             // The updates the internal state of the issuer and issues the same amount of currency (as tokens) that was
             // "paid" into the issuer's bank account.
 
+            println("Add nostro transaction (issue cash)")
             val addNostroTransactionFlow = I.rpc.startFlow(::AddNostroTransactions, listOf(paymentToIssuerNostro)).returnValue.toCompletableFuture()
             // Get the first nostro transaction state added to the database.
             val newNostroTransactionState = I.rpc.vaultTrack(NostroTransactionState::class.java).updates.getOrThrow()
@@ -181,15 +194,12 @@ class IntegrationTest {
             // Stage 4 - Cash payment.
             // ----------------------
 
-            val tokenMoveFlow = A.rpc.startFlowDynamic(
-                    ConfidentialMoveFungibleTokens::class.java,
-                    PartyAndAmount(bParty, 500.GBP),
-                    emptyList<Party>(),
-                    null,
-                    null
-            ).returnValue.toCompletableFuture()
-            val newTokenMove = B.rpc.vaultTrack(FungibleToken::class.java).updates.getOrThrow()
-            println(newTokenMove)
+            println("Cash payment.")
+            val moveCashFlow = A.rpc.startFlowDynamic(MoveCash::class.java, bParty, 500.GBP).returnValue.toCompletableFuture()
+            val newTokenMoveA = A.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
+            val newTokenMoveB = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
+            CompletableFuture.allOf(moveCashFlow, newTokenMoveA, newTokenMoveB)
+            println(moveCashFlow.getOrThrow().tx)
 
             // -------------------------------------
             // Stage 5 - Add Party B's bank account.
@@ -209,20 +219,26 @@ class IntegrationTest {
             // Stage 6 - Redeem tokens with change.
             // ------------------------------------
 
-            val redeemTx = B.rpc.startFlowDynamic(
-                    RedeemToken.InitiateRedeem::class.java,
-                    GBP,
-                    issuerParty,
-                    200.GBP,
-                    true
-            ).returnValue.toCompletableFuture()
+            val redeemTx = B.rpc.startFlowDynamic(RedeemCash::class.java, 200.GBP, issuerParty).returnValue.toCompletableFuture()
+            val partyBchange = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
+            CompletableFuture.allOf(redeemTx, partyBchange)
+            println("Party B change:")
+            println(partyBchange.getOrThrow())
             println(redeemTx.getOrThrow().tx)
-            val partyBRedeem = B.rpc.vaultTrack(FungibleToken::class.java).updates.getOrThrow()
-            val issuerRedeem = B.rpc.vaultTrack(FungibleToken::class.java).updates.getOrThrow()
-            println(partyBRedeem)
-            println(issuerRedeem)
-            val issuerNodeTransaction = B.rpc.vaultTrack(NodeTransactionState::class.java).updates.getOrThrow()
-            println(issuerNodeTransaction)
+            val nodeTxStateTracker = I.rpc.vaultTrack(NodeTransactionState::class.java).updates.toFuture().toCompletableFuture()
+            // Generate the payment from the issuer to the redeeming party's bank account.
+            val nodeTxState = nodeTxStateTracker.getOrThrow()
+            val secretCode = nodeTxState.produced.single().state.data.notes
+            val nostroTx = generatePaymentFromIssuerNostro(secretCode)
+            val redeemNostroTxFlow = I.rpc.startFlow(::AddNostroTransactions, listOf(nostroTx)).returnValue.toCompletableFuture()
+            // Get the first nostro transaction state added to the database.
+            val redeemNostroTxState = I.rpc.vaultTrack(NostroTransactionState::class.java).updates.getOrThrow()
+            println(redeemNostroTxState)
+            val updateNostroTxState = I.rpc.vaultTrack(NostroTransactionState::class.java).updates.getOrThrow()
+            println(updateNostroTxState)
+            val nodeTxStateTrackerTwo = I.rpc.vaultTrack(NodeTransactionState::class.java).updates.getOrThrow()
+            println(nodeTxStateTrackerTwo)
+            redeemNostroTxFlow.getOrThrow()
         }
 
     }

@@ -28,7 +28,7 @@ dependencies {
     cordaCompile project(":service")
 
     // Token SDK.
-    cordaCompile "com.r3.tokens-sdk:workflow:1.0-RC01"
+    cordaCompile "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
 
     // Tornado Fx.
     compile 'no.tornado:tornadofx:1.7.15'

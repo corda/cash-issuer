@@ -1,10 +1,10 @@
 package com.r3.corda.finance.cash.issuer.client.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.sdk.issuer.common.workflows.flows.AbstractRedeemCash
 import com.r3.corda.sdk.token.money.FiatCurrency
-import com.r3.corda.sdk.token.workflow.flows.redeem.RedeemToken
+import com.r3.corda.sdk.token.workflow.flows.redeem.ConfidentialRedeemFungibleTokensFlow
 import net.corda.core.contracts.Amount
-import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService
 import net.corda.core.identity.Party
@@ -13,7 +13,7 @@ import net.corda.core.utilities.ProgressTracker
 
 @StartableByRPC
 @StartableByService
-class RedeemCash(val amount: Amount<FiatCurrency>, val issuer: Party) : FlowLogic<SignedTransaction>() {
+class RedeemCash(val amount: Amount<FiatCurrency>, val issuer: Party) : AbstractRedeemCash() {
 
     companion object {
         object REDEEMING : ProgressTracker.Step("Redeeming cash.")
@@ -25,7 +25,7 @@ class RedeemCash(val amount: Amount<FiatCurrency>, val issuer: Party) : FlowLogi
 
     @Suspendable
     override fun call(): SignedTransaction {
-        val tokenType = amount.token
-        return subFlow(RedeemToken.InitiateRedeem(tokenType, issuer, amount, anonymous = true))
+        val issuerSession = initiateFlow(issuer)
+        return subFlow(ConfidentialRedeemFungibleTokensFlow(amount, issuer, issuerSession))
     }
 }

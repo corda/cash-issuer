@@ -7,6 +7,7 @@ import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionStatus
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionType
+import com.r3.corda.sdk.token.contracts.commands.RedeemTokenCommand
 import net.corda.core.contracts.CommandData
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
@@ -41,6 +42,7 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
             val isUpdateBankAccount = checkCommand<BankAccountContract.Update>(signedTransaction)
             val isAddNostroTransaction = checkCommand<NostroTransactionContract.Add>(signedTransaction)
             val isMatchNostroTransaction = checkCommand<NostroTransactionContract.Match>(signedTransaction)
+            val isRedeem = checkCommand<RedeemTokenCommand<*>>(signedTransaction)
 
             logger.info("isAddBankAccount=$isAddBankAccount,isAddNostroTx=$isAddNostroTransaction,isMatchNostroTx=" +
                     "$isMatchNostroTransaction,isUpdateBankAccount=$isUpdateBankAccount")
@@ -61,13 +63,24 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
                     logger.info("A full or partial nostro transaction match has occurred...")
                     matchNostroTransactionAction(signedTransaction)
                 }
-                else -> logger.info("Transaction type not recognised.")
+                isRedeem -> {
+                    logger.info("A redemption has occured.")
+                    processRedemption(signedTransaction)
+                }
+                else -> {
+                    logger.info("Transaction type not recognised.")
+                    println(signedTransaction.tx)
+                }
             }
         }, { throwable -> logger.info(throwable.message) })
     }
 
     inline fun <reified T : CommandData> checkCommand(stx: SignedTransaction): Boolean {
         return stx.tx.commands.singleOrNull { it.value is T } != null
+    }
+
+    private fun processRedemption(signedTransaction: SignedTransaction) {
+        services.startFlow(ProcessRedemption(signedTransaction))
     }
 
     /**
