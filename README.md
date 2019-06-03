@@ -2,18 +2,9 @@
 
 # Corda Cash Issuer
 
-## WARNING:
-
-**!!! DO NOT USE IN PRODUCTION !!!**
-
-**!! DO NOT USE WITH REAL CUSTOMERS OR REAL MONEY WITHOUT APPROPRIATE LICENSES AND REGULATORY ENGAGEMENT !!**
-
-**!! THIS CODE IS INTENDED TO BE USED WITH EPHEMERAL CORDA NETWORKS FOR DEMO 
-PUROSES ONLY !!**
-
-This code use a nightly snapshot (4.0-SNAPSHOT) release of Corda 
-obtained from the R3 artifactory repository. There is a chance that a particular
-build could be unstable!
+** WARNING: This code is not intended for production but serves as a good example
+of how to integrate the Tokens SDK with real bank accounts for projects that 
+require "cash on ledger".
 
 This code works with Monzo and Starling bank accounts. For those that do not have
 Monzo or Starling bank accounts you can use the `MockMonzo` client to generate
