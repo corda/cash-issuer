@@ -14,7 +14,7 @@ The full potential of blockchain technology will be realised when members of a C
 Broadly, there are two different forms of cash in the economy:
 
 - **Central bank money** which is a liability of national (or supra-national) central banks. It is manifested as physical notes and coins issued by the central bank, or digital reserves held by commercial banks in the same jurisdiction as the central bank. Commercial banks use these reserves as capital, as well as for settling payments with customers at other banks in the same jurisdiction.
-- **Commercial bank money** which is a liability of commercial banks. It is manifested as deposits with commercial banks and is created when banks extend loans to customers. Conversely, it is destroyed when customers pay back loans. As such, commercial bank money is just an number in a commercial bank's accounting system.
+- **Commercial bank money** which is a liability of commercial banks. It is manifested as deposits with commercial banks and is created when banks extend loans to customers. Conversely, it is destroyed when customers pay back loans. As such, commercial bank money is just a number in a commercial bank's accounting system.
 
 It is useful to depict the relationship between central bank money and commercial bank money. As can be seen, the majority of money in circulation is manifested as commercial bank deposits. 
 
