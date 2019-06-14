@@ -39,5 +39,5 @@ dependencies {
     cordaCompile project(":common:contracts")
 
     // Token SDK.
-    cordaCompile "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
+    cordaCompile "$tokens_release_group:tokens-workflows:$tokens_release_version"
 }

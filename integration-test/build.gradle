@@ -37,7 +37,37 @@ dependencies {
     testCompile project(":common:workflows")
     testCompile project(":service")
     testCompile project(":client")
-    testCompile "com.r3.tokens-sdk:contract:$tokens_sdk_version"
-    testCompile "com.r3.tokens-sdk:money:$tokens_sdk_version"
-    testCompile "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
+    testCompile "$tokens_release_group:tokens-contracts:$tokens_release_version"
+    testCompile "$tokens_release_group:tokens-workflows:$tokens_release_version"
+    testCompile "$tokens_release_group:tokens-money:$tokens_release_version"
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir "config/dev"
+        }
+    }
+    test {
+        resources {
+            srcDir "config/test"
+        }
+    }
+    integrationTest {
+        kotlin {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integrationTest/kotlin')
+        }
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type: Test, dependsOn: []) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }

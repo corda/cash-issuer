@@ -1,10 +1,10 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
 import com.r3.corda.finance.cash.issuer.daemon.mock.MockMonzo
+import com.r3.corda.lib.tokens.money.GBP
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
 import com.r3.corda.sdk.issuer.common.workflows.utilities.generateRandomString
-import com.r3.corda.sdk.token.money.GBP
 import joptsimple.OptionException
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.client.rpc.RPCException

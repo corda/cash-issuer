@@ -1,10 +1,10 @@
 package com.r3.corda.finance.cash.issuer.daemon.mock
 
+import com.r3.corda.lib.tokens.money.GBP
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccount
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
 import com.r3.corda.sdk.issuer.common.workflows.utilities.*
-import com.r3.corda.sdk.token.money.GBP
 import net.corda.core.internal.randomOrNull
 import java.time.Instant
 

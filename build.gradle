@@ -1,7 +1,8 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
     ext.corda_release_version = '5.0-SNAPSHOT'
-    ext.tokens_sdk_version = '1.0-RC02'
+    ext.tokens_release_group = 'com.r3.corda.lib.tokens'
+    ext.tokens_release_version = '1.0-RC03'
     ext.corda_gradle_plugins_version = '4.0.42'
     ext.kotlin_version = '1.2.71'
     ext.junit_version = '4.12'
@@ -69,36 +70,6 @@ apply plugin: 'net.corda.plugins.cordapp'
 apply plugin: 'net.corda.plugins.cordformation'
 apply plugin: 'net.corda.plugins.quasar-utils'
 
-sourceSets {
-    main {
-        resources {
-            srcDir "config/dev"
-        }
-    }
-    test {
-        resources {
-            srcDir "config/test"
-        }
-    }
-    integrationTest {
-        kotlin {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-            srcDir file('src/integrationTest/kotlin')
-        }
-    }
-}
-
-configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
-
-task integrationTest(type: Test, dependsOn: []) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-}
-
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
@@ -122,13 +93,23 @@ dependencies {
     cordapp project(":daemon")
     cordapp project(":client")
     cordapp project(":service")
-    cordapp "com.r3.tokens-sdk:contract:$tokens_sdk_version"
-    cordapp "com.r3.tokens-sdk:money:$tokens_sdk_version"
-    cordapp "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
+    cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
+    cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
+    cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
 }
 
 task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     directory "./build/nodes"
+    nodeDefaults {
+        projectCordapp {
+            deploy = false
+        }
+        cordapp("$tokens_release_group:tokens-contracts:$tokens_release_version")
+        cordapp("$tokens_release_group:tokens-workflows:$tokens_release_version")
+        cordapp("$tokens_release_group:tokens-money:$tokens_release_version")
+        cordapp project(":common:contracts")
+        cordapp project(":common:workflows")
+    }
     node {
         name "O=Notary,L=London,C=GB"
         notary = [validating : false]
@@ -146,12 +127,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             address("localhost:10006")
             adminAddress("localhost:10046")
         }
-        cordapp project(":common:contracts")
-        cordapp project(":common:workflows")
         cordapp project(":service")
-        cordapp "com.r3.tokens-sdk:contract:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:money:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
     node {
@@ -162,11 +138,6 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10049")
         }
         cordapp project(":client")
-        cordapp project(":common:contracts")
-        cordapp project(":common:workflows")
-        cordapp "com.r3.tokens-sdk:contract:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:money:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
     node {
@@ -177,11 +148,6 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress("localhost:10052")
         }
         cordapp project(":client")
-        cordapp project(":common:contracts")
-        cordapp project(":common:workflows")
-        cordapp "com.r3.tokens-sdk:contract:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:money:$tokens_sdk_version"
-        cordapp "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
 }

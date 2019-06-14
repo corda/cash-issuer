@@ -1,6 +1,6 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
-import com.r3.corda.sdk.token.money.FiatCurrency
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
