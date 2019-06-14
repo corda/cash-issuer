@@ -2,6 +2,8 @@ package test
 
 import com.r3.corda.finance.cash.issuer.client.flows.RedeemCash
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.money.GBP
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
@@ -11,8 +13,6 @@ import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
 import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
 import com.r3.corda.sdk.issuer.common.workflows.flows.MoveCash
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.money.GBP
 import net.corda.core.contracts.ContractState
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startFlow
@@ -55,9 +55,9 @@ class IntegrationTest {
     private val defaultCorDapps = listOf(
             TestCordapp.findCordapp("com.r3.corda.sdk.issuer.common.contracts"),
             TestCordapp.findCordapp("com.r3.corda.sdk.issuer.common.workflows"),
-            TestCordapp.findCordapp("com.r3.corda.sdk.token.workflow"),
-            TestCordapp.findCordapp("com.r3.corda.sdk.token.contracts"),
-            TestCordapp.findCordapp("com.r3.corda.sdk.token.money")
+            TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
+            TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
+            TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
     )
 
     private val driverParameters = DriverParameters(

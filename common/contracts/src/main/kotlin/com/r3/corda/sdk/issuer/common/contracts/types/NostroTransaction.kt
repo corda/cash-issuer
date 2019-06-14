@@ -1,7 +1,7 @@
 package com.r3.corda.sdk.issuer.common.contracts.types
 
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable

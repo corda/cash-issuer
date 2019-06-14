@@ -1,11 +1,11 @@
 package com.r3.corda.finance.cash.issuer.daemon.mock
 
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApi
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccount
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.workflows.utilities.MockContact
 import com.r3.corda.sdk.issuer.common.workflows.utilities.MockTransactionGenerator
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.Amount
 import rx.Observable
 import java.util.*

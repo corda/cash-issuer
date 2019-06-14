@@ -1,11 +1,11 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.sdk.issuer.common.contracts.types.AccountNumber
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionStatus
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionType
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState

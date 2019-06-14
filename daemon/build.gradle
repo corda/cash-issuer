@@ -72,8 +72,8 @@ dependencies {
     compile project(":service")
 
     // Token SDK.
-    compile "com.r3.tokens-sdk:workflow:$tokens_sdk_version"
-    compile "com.r3.tokens-sdk:money:$tokens_sdk_version"
+    compile "$tokens_release_group:tokens-workflows:$tokens_release_version"
+    compile "$tokens_release_group:tokens-money:$tokens_release_version"
 
 }
 

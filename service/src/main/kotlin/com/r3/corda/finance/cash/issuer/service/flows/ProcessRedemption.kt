@@ -1,16 +1,16 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrThrow
+import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrZero
+import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.workflows.utilities.toParty
 import com.r3.corda.sdk.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.NodeTransactionType
 import com.r3.corda.sdk.issuer.common.workflows.utilities.GenerationScheme
 import com.r3.corda.sdk.issuer.common.workflows.utilities.generateRandomString
-import com.r3.corda.sdk.token.contracts.states.FungibleToken
-import com.r3.corda.sdk.token.contracts.utilities.sumTokenStatesOrThrow
-import com.r3.corda.sdk.token.contracts.utilities.sumTokenStatesOrZero
-import com.r3.corda.sdk.token.money.FiatCurrency
-import com.r3.corda.sdk.token.workflow.utilities.toParty
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic

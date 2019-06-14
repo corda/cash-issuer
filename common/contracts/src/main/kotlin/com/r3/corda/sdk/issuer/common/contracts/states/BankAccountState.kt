@@ -1,10 +1,10 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.BankAccountContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.BankAccountStateSchemaV1
 import com.r3.corda.sdk.issuer.common.contracts.types.AccountNumber
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier

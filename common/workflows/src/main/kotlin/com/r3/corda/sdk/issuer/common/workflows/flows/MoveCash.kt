@@ -1,9 +1,9 @@
 package com.r3.corda.sdk.issuer.common.workflows.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.sdk.token.money.FiatCurrency
-import com.r3.corda.sdk.token.workflow.flows.move.ConfidentialSelectAndMoveFungibleTokensFlow
-import com.r3.corda.sdk.token.workflow.types.PartyAndAmount
+import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.workflows.flows.move.ConfidentialMoveFungibleTokensFlow
+import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
@@ -32,7 +32,7 @@ class MoveCash(val recipient: Party, val amount: Amount<FiatCurrency>) : FlowLog
     @Suspendable
     override fun call(): SignedTransaction {
         val recipientSession = initiateFlow(recipient)
-        return subFlow(ConfidentialSelectAndMoveFungibleTokensFlow(
+        return subFlow(ConfidentialMoveFungibleTokensFlow(
                 partiesAndAmounts = listOf(PartyAndAmount(recipient, amount)),
                 participantSessions = listOf(recipientSession),
                 observerSessions = emptyList(),

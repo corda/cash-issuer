@@ -2,8 +2,8 @@ package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.r3.corda.finance.cash.issuer.daemon.*
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.types.*
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Query

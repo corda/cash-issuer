@@ -5,8 +5,8 @@ import com.r3.corda.finance.cash.issuer.daemon.BankAccountId
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiClient
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApiFactory
 import com.r3.corda.finance.cash.issuer.daemon.getOrThrow
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.types.*
-import com.r3.corda.sdk.token.money.FiatCurrency
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
 import retrofit2.http.Path

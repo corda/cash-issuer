@@ -1,7 +1,7 @@
 package com.r3.corda.sdk.issuer.common.workflows.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.sdk.token.workflow.flows.move.ConfidentialMoveTokensFlowHandler
+import com.r3.corda.lib.tokens.workflows.flows.move.ConfidentialMoveTokensFlowHandler
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatedBy

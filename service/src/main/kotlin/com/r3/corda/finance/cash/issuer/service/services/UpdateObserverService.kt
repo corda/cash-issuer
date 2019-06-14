@@ -1,6 +1,7 @@
 package com.r3.corda.finance.cash.issuer.service.services
 
 import com.r3.corda.finance.cash.issuer.service.flows.*
+import com.r3.corda.lib.tokens.contracts.commands.RedeemTokenCommand
 import com.r3.corda.sdk.issuer.common.contracts.BankAccountContract
 import com.r3.corda.sdk.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState

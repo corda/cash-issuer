@@ -1,11 +1,11 @@
 package com.r3.corda.finance.cash.issuer
 
+import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.*
 import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
-import com.r3.corda.sdk.token.money.FiatCurrency
 import javafx.application.Application
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleStringProperty

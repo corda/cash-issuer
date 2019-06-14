@@ -1,13 +1,13 @@
 package com.r3.corda.finance.cash.issuer.service.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.utilities.heldBy
+import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
+import com.r3.corda.lib.tokens.contracts.utilities.of
+import com.r3.corda.lib.tokens.workflows.flows.shell.ConfidentialIssueTokens
 import com.r3.corda.sdk.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.NodeTransactionStatus
-import com.r3.corda.sdk.token.contracts.utilities.heldBy
-import com.r3.corda.sdk.token.contracts.utilities.issuedBy
-import com.r3.corda.sdk.token.contracts.utilities.of
-import com.r3.corda.sdk.token.workflow.flows.shell.ConfidentialIssueTokens
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
