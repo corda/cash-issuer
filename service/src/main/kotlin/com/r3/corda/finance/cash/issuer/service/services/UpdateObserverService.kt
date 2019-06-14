@@ -8,7 +8,6 @@ import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionStatus
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransactionType
-import com.r3.corda.sdk.token.contracts.commands.RedeemTokenCommand
 import net.corda.core.contracts.CommandData
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
