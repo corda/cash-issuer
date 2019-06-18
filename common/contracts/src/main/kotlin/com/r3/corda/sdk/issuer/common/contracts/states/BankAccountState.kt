@@ -1,8 +1,10 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.BankAccountContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.BankAccountStateSchemaV1
+import com.r3.corda.sdk.issuer.common.contracts.serializers.FiatCurrencySerializer
 import com.r3.corda.sdk.issuer.common.contracts.types.AccountNumber
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
 import net.corda.core.contracts.BelongsToContract
@@ -15,6 +17,7 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 import java.time.Instant
 
+
 // The same principle applies to all accounts, customers and issuers.
 // Only match transactions once the accounts have been verified/whitelisted.
 @BelongsToContract(BankAccountContract::class)
@@ -23,7 +26,7 @@ data class BankAccountState(
         val verifier: Party,
         val accountName: String,
         val accountNumber: AccountNumber,
-        val currency: FiatCurrency,
+        @JsonSerialize(using = FiatCurrencySerializer::class) val currency: FiatCurrency,
         val type: BankAccountType,
         val verified: Boolean,
         override val linearId: UniqueIdentifier,

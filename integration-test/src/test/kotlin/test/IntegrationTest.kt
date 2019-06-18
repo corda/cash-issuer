@@ -1,6 +1,6 @@
 package test
 
-import com.r3.corda.finance.cash.issuer.client.flows.RedeemCash
+import com.r3.corda.finance.cash.issuer.client.flows.RedeemCashShell
 import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.money.GBP
@@ -12,7 +12,7 @@ import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
 import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
-import com.r3.corda.sdk.issuer.common.workflows.flows.MoveCash
+import com.r3.corda.sdk.issuer.common.workflows.flows.MoveCashShell
 import net.corda.core.contracts.ContractState
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startFlow
@@ -195,7 +195,7 @@ class IntegrationTest {
             // ----------------------
 
             println("Cash payment.")
-            val moveCashFlow = A.rpc.startFlowDynamic(MoveCash::class.java, bParty, 500.GBP).returnValue.toCompletableFuture()
+            val moveCashFlow = A.rpc.startFlowDynamic(MoveCashShell::class.java, bParty, 500L, "GBP").returnValue.toCompletableFuture()
             val newTokenMoveA = A.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             val newTokenMoveB = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             CompletableFuture.allOf(moveCashFlow, newTokenMoveA, newTokenMoveB)
@@ -219,7 +219,7 @@ class IntegrationTest {
             // Stage 6 - Redeem tokens with change.
             // ------------------------------------
 
-            val redeemTx = B.rpc.startFlowDynamic(RedeemCash::class.java, 200.GBP, issuerParty).returnValue.toCompletableFuture()
+            val redeemTx = B.rpc.startFlowDynamic(RedeemCashShell::class.java, 200L, "GBP", issuerParty).returnValue.toCompletableFuture()
             val partyBchange = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             CompletableFuture.allOf(redeemTx, partyBchange)
             println("Party B change:")

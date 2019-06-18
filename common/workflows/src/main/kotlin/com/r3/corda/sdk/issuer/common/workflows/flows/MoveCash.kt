@@ -1,6 +1,7 @@
 package com.r3.corda.sdk.issuer.common.workflows.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.flows.move.ConfidentialMoveFungibleTokensFlow
 import com.r3.corda.lib.tokens.workflows.types.PartyAndAmount
@@ -15,19 +16,10 @@ import net.corda.core.utilities.ProgressTracker
 /**
  * Simple move cash flow for demos.
  */
-@StartableByRPC
 @InitiatingFlow
 class MoveCash(val recipient: Party, val amount: Amount<FiatCurrency>) : FlowLogic<SignedTransaction>() {
 
-    companion object {
-        // TODO: Add the rest of the progress tracker.
-        object MOVING : ProgressTracker.Step("Moving cash.")
-
-        @JvmStatic
-        fun tracker() = ProgressTracker(MOVING)
-    }
-
-    override val progressTracker: ProgressTracker = tracker()
+    override val progressTracker: ProgressTracker = ProgressTracker()
 
     @Suspendable
     override fun call(): SignedTransaction {
@@ -39,5 +31,24 @@ class MoveCash(val recipient: Party, val amount: Amount<FiatCurrency>) : FlowLog
                 queryCriteria = null,
                 changeHolder = null
         ))
+    }
+}
+
+@StartableByRPC
+class MoveCashShell(val recipient: Party, val amount: Long, val currency: String) : FlowLogic<SignedTransaction>() {
+
+    companion object {
+        object MOVING : ProgressTracker.Step("Moving cash.")
+
+        @JvmStatic
+        fun tracker() = ProgressTracker(MOVING)
+    }
+
+    override val progressTracker: ProgressTracker = tracker()
+
+    @Suspendable
+    override fun call(): SignedTransaction {
+        val fiatCurrency = FiatCurrency.getInstance(currency)
+        return subFlow(MoveCash(recipient, amount of fiatCurrency))
     }
 }

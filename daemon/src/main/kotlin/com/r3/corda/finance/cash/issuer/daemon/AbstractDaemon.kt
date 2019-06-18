@@ -130,7 +130,7 @@ abstract class AbstractDaemon(val services: CordaRPCOps, val cmdLineOptions: Com
             val id = accountId.truncate()
             val difference = node.quantity - bank.quantity
             totalDifference += difference
-            println("\t$id\t\t$node\t\t$bank\t\t$difference")
+            println("\t$id\t\t$node\t\t\t$bank\t\t\t$difference")
         }
         println()
         println("\t\t\t\t\t\t\tTotal difference: \t\t$totalDifference")
