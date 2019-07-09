@@ -1,5 +1,6 @@
 package com.r3.corda.finance.cash.issuer
 
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
@@ -37,7 +38,7 @@ class BankAccountUiModel(
         externalAccountId: String,
         accountName: String,
         accountNumber: AccountNumber,
-        currency: FiatCurrency,
+        currency: TokenType,
         type: BankAccountType,
         verified: Boolean,
         lastUpdated: Instant
@@ -58,7 +59,7 @@ class NostroTransactionUiModel(
         internalTransactionId: UUID,
         accountId: String,
         amount: Long,
-        currency: FiatCurrency,
+        currency: TokenType,
         source: AccountNumber,
         destination: AccountNumber,
         createdAt: Instant,
@@ -81,7 +82,7 @@ class NostroTransactionUiModel(
 class NodeTransactionUiModel(
         transactionId: UUID,
         amount: Long,
-        currency: FiatCurrency,
+        currency: TokenType,
         source: Party,
         notes: String,
         destination: Party,

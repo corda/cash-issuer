@@ -4,7 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.utilities.heldBy
 import com.r3.corda.lib.tokens.contracts.utilities.issuedBy
 import com.r3.corda.lib.tokens.contracts.utilities.of
-import com.r3.corda.lib.tokens.workflows.flows.shell.ConfidentialIssueTokens
+import com.r3.corda.lib.tokens.workflows.flows.rpc.ConfidentialIssueTokens
 import com.r3.corda.sdk.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
 import com.r3.corda.sdk.issuer.common.contracts.types.NodeTransactionStatus

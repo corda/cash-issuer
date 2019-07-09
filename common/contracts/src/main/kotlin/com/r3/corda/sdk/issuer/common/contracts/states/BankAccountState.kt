@@ -1,10 +1,10 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.BankAccountContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.BankAccountStateSchemaV1
-import com.r3.corda.sdk.issuer.common.contracts.serializers.FiatCurrencySerializer
+import com.r3.corda.sdk.issuer.common.contracts.serializers.TokenTypeSerializer
 import com.r3.corda.sdk.issuer.common.contracts.types.AccountNumber
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
 import net.corda.core.contracts.BelongsToContract
@@ -26,7 +26,7 @@ data class BankAccountState(
         val verifier: Party,
         val accountName: String,
         val accountNumber: AccountNumber,
-        @JsonSerialize(using = FiatCurrencySerializer::class) val currency: FiatCurrency,
+        @JsonSerialize(using = TokenTypeSerializer::class) val currency: TokenType,
         val type: BankAccountType,
         val verified: Boolean,
         override val linearId: UniqueIdentifier,
@@ -39,7 +39,7 @@ data class BankAccountState(
             accountId: String,
             accountName: String,
             accountNumber: AccountNumber,
-            currency: FiatCurrency,
+            currency: TokenType,
             type: BankAccountType
     ) : this(owner, verifier, accountName, accountNumber, currency, type, false, UniqueIdentifier(accountId))
 

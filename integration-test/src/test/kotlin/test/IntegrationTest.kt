@@ -61,9 +61,10 @@ class IntegrationTest {
     )
 
     private val driverParameters = DriverParameters(
-            startNodesInProcess = true,
+            startNodesInProcess = false,
             cordappsForAllNodes = defaultCorDapps,
-            networkParameters = testNetworkParameters(notaries = emptyList(), minimumPlatformVersion = 4)
+            networkParameters = testNetworkParameters(notaries = emptyList(), minimumPlatformVersion = 4),
+            isDebug = false
     )
 
     @Test

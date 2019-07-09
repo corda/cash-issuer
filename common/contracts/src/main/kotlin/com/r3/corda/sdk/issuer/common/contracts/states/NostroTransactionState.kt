@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.NostroTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.NostroTransactionStateSchemaV1
 import com.r3.corda.sdk.issuer.common.contracts.types.AccountNumber
@@ -20,7 +20,7 @@ import java.time.Instant
 @BelongsToContract(NostroTransactionContract::class)
 data class NostroTransactionState(
         val accountId: String,
-        val amountTransfer: AmountTransfer<FiatCurrency, AccountNumber>,
+        val amountTransfer: AmountTransfer<TokenType, AccountNumber>,
         val description: String,
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
@@ -34,7 +34,7 @@ data class NostroTransactionState(
             accountId: String,
             issuer: Party,
             transactionId: String,
-            amountTransfer: AmountTransfer<FiatCurrency, AccountNumber>,
+            amountTransfer: AmountTransfer<TokenType, AccountNumber>,
             description: String,
             createdAt: Instant
     ) : this(accountId, amountTransfer, description, createdAt, listOf(issuer), UniqueIdentifier(transactionId))

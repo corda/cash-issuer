@@ -1,6 +1,7 @@
 package com.r3.corda.finance.cash.issuer.client.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.flows.redeem.ConfidentialRedeemFungibleTokensFlow
@@ -12,7 +13,7 @@ import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 
-class RedeemCash(val amount: Amount<FiatCurrency>, val issuer: Party) : AbstractRedeemCash() {
+class RedeemCash(val amount: Amount<TokenType>, val issuer: Party) : AbstractRedeemCash() {
 
     companion object {
         object REDEEMING : ProgressTracker.Step("Redeeming cash.")

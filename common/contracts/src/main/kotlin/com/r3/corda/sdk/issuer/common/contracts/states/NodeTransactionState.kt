@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.issuer.common.contracts.states
 
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.schemas.NodeTransactionStateSchemaV1
 import com.r3.corda.sdk.issuer.common.contracts.types.NodeTransactionStatus
@@ -18,7 +18,7 @@ import java.time.Instant
 
 @BelongsToContract(NodeTransactionContract::class)
 data class NodeTransactionState(
-        val amountTransfer: AmountTransfer<FiatCurrency, Party>,
+        val amountTransfer: AmountTransfer<TokenType, Party>,
         val createdAt: Instant,
         override val participants: List<AbstractParty>,
         val notes: String,

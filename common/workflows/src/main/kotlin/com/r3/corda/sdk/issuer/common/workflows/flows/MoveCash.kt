@@ -1,6 +1,7 @@
 package com.r3.corda.sdk.issuer.common.workflows.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.flows.move.ConfidentialMoveFungibleTokensFlow
@@ -17,19 +18,20 @@ import net.corda.core.utilities.ProgressTracker
  * Simple move cash flow for demos.
  */
 @InitiatingFlow
-class MoveCash(val recipient: Party, val amount: Amount<FiatCurrency>) : FlowLogic<SignedTransaction>() {
+class MoveCash(val recipient: Party, val amount: Amount<TokenType>) : FlowLogic<SignedTransaction>() {
 
     override val progressTracker: ProgressTracker = ProgressTracker()
 
     @Suspendable
     override fun call(): SignedTransaction {
         val recipientSession = initiateFlow(recipient)
+        val changeKey = serviceHub.keyManagementService.freshKeyAndCert(ourIdentityAndCert, false).party.anonymise()
         return subFlow(ConfidentialMoveFungibleTokensFlow(
                 partiesAndAmounts = listOf(PartyAndAmount(recipient, amount)),
                 participantSessions = listOf(recipientSession),
                 observerSessions = emptyList(),
                 queryCriteria = null,
-                changeHolder = null
+                changeHolder = changeKey
         ))
     }
 }

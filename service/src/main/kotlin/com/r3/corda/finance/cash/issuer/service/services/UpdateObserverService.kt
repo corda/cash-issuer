@@ -42,7 +42,7 @@ class UpdateObserverService(val services: AppServiceHub) : SingletonSerializeAsT
             val isUpdateBankAccount = checkCommand<BankAccountContract.Update>(signedTransaction)
             val isAddNostroTransaction = checkCommand<NostroTransactionContract.Add>(signedTransaction)
             val isMatchNostroTransaction = checkCommand<NostroTransactionContract.Match>(signedTransaction)
-            val isRedeem = checkCommand<RedeemTokenCommand<*>>(signedTransaction)
+            val isRedeem = checkCommand<RedeemTokenCommand>(signedTransaction)
 
             logger.info("isAddBankAccount=$isAddBankAccount,isAddNostroTx=$isAddNostroTransaction,isMatchNostroTx=" +
                     "$isMatchNostroTransaction,isUpdateBankAccount=$isUpdateBankAccount")

@@ -1,7 +1,7 @@
 package com.r3.corda.finance.cash.issuer.daemon.mock
 
 import com.r3.corda.finance.cash.issuer.daemon.OpenBankingApi
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.types.BankAccount
 import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
 import com.r3.corda.sdk.issuer.common.workflows.utilities.MockContact
@@ -42,7 +42,7 @@ class MockMonzo(
      */
     override val contactBalances: MutableMap<MockContact, Long> = Collections.synchronizedMap<MockContact, Long>(hashMapOf())
 
-    override fun balance(accountId: String?): Amount<FiatCurrency> {
+    override fun balance(accountId: String?): Amount<TokenType> {
         if (accountId == null) throw IllegalArgumentException("You must specify an accountId.")
         val balance = transactions.map(NostroTransaction::amount).sum()
         return Amount(balance, accounts.single().currency)

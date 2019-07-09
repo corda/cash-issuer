@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.issuer.common.contracts.types
 
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
 import net.corda.core.contracts.AmountTransfer
 import net.corda.core.identity.Party
@@ -12,7 +12,7 @@ data class NostroTransaction(
         val transactionId: String,
         val accountId: String,
         val amount: Long,
-        val currency: FiatCurrency,
+        val currency: TokenType,
         val type: String,
         val description: String,
         val createdAt: Instant,

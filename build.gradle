@@ -1,8 +1,8 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
-    ext.corda_release_version = '5.0-SNAPSHOT'
+    ext.corda_release_version = '4.1'
     ext.tokens_release_group = 'com.r3.corda.lib.tokens'
-    ext.tokens_release_version = '1.0-RC03'
+    ext.tokens_release_version = '1.0'
     ext.corda_gradle_plugins_version = '4.0.42'
     ext.kotlin_version = '1.2.71'
     ext.junit_version = '4.12'
@@ -42,7 +42,8 @@ allprojects {
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda' }
         // Can be removed post-release - used to get nightly snapshot build.
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-dev' }
-        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-tokens-dev" }
+        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib" }
+        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev" }
         maven { url 'https://jitpack.io' }
         maven { url 'https://repo.gradle.org/gradle/libs-releases-local/' }
     }

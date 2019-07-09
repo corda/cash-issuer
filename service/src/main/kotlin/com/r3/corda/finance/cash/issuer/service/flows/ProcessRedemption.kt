@@ -4,7 +4,6 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
 import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrThrow
 import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrZero
-import com.r3.corda.lib.tokens.money.FiatCurrency
 import com.r3.corda.lib.tokens.workflows.utilities.toParty
 import com.r3.corda.sdk.issuer.common.contracts.NodeTransactionContract
 import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
@@ -25,11 +24,11 @@ class ProcessRedemption(val signedTransaction: SignedTransaction) : FlowLogic<Si
     override fun call(): SignedTransaction {
         // Calculate the redemption amount.
         val ledgerTx = signedTransaction.tx.toLedgerTransaction(serviceHub)
-        val inputAmount = ledgerTx.inputsOfType<FungibleToken<FiatCurrency>>().sumTokenStatesOrThrow()
+        val inputAmount = ledgerTx.inputsOfType<FungibleToken>().sumTokenStatesOrThrow()
         val inputIssuedTokenType = inputAmount.token
-        val outputAmount = ledgerTx.outputsOfType<FungibleToken<FiatCurrency>>().sumTokenStatesOrZero(inputIssuedTokenType)
+        val outputAmount = ledgerTx.outputsOfType<FungibleToken>().sumTokenStatesOrZero(inputIssuedTokenType)
         val redemptionAmount = inputAmount - outputAmount
-        val redeemingParty = ledgerTx.inputsOfType<FungibleToken<FiatCurrency>>()
+        val redeemingParty = ledgerTx.inputsOfType<FungibleToken>()
                 .map { it.holder.toParty(serviceHub) }
                 .toSet()
                 .single()

@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.issuer.common.contracts.types
 
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
@@ -10,7 +10,7 @@ data class BankAccount(
         val accountId: String,
         val accountName: String,
         val accountNumber: AccountNumber,
-        val currency: FiatCurrency,
+        val currency: TokenType,
         val type: BankAccountType = BankAccountType.COLLATERAL // Defaulted to collateral for now.
 )
 

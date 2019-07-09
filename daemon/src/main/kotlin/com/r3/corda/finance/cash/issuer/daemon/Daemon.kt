@@ -1,6 +1,6 @@
 package com.r3.corda.finance.cash.issuer.daemon
 
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.Amount
 import net.corda.core.messaging.CordaRPCOps
@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException
 
 private val clientsPackage = "com.r3.corda.finance.cash.issuer.daemon.clients"
 
-data class Balance(val accountId: BankAccountId, val nodeBalance: Amount<FiatCurrency>, val bankBalance: Amount<FiatCurrency>)
+data class Balance(val accountId: BankAccountId, val nodeBalance: Amount<TokenType>, val bankBalance: Amount<TokenType>)
 
 class Daemon(services: CordaRPCOps, options: CommandLineOptions) : AbstractDaemon(services, options) {
     override fun scanForOpenBankingApiClients(): List<OpenBankingApi> {

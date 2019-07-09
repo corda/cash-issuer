@@ -2,7 +2,7 @@ package com.r3.corda.finance.cash.issuer.daemon.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.r3.corda.finance.cash.issuer.daemon.*
-import com.r3.corda.lib.tokens.money.FiatCurrency
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.sdk.issuer.common.contracts.types.*
 import net.corda.core.contracts.Amount
 import retrofit2.http.GET
@@ -55,7 +55,7 @@ class MonzoClient(configName: String) : OpenBankingApiClient(configName) {
         }
     }
 
-    override fun balance(accountId: BankAccountId?): Amount<FiatCurrency> {
+    override fun balance(accountId: BankAccountId?): Amount<TokenType> {
         if (accountId == null) throw IllegalArgumentException("AccountId is required for Monzo::balance.")
         val balance = wrapWithTry { api.balance(accountId).getOrThrow() }
         return Amount(balance.balance, balance.currency)
@@ -94,13 +94,13 @@ data class MonzoAccount(
         val sort_code: String?
 )
 
-fun MonzoAccount.toBankAccount(currency: FiatCurrency): BankAccount {
+fun MonzoAccount.toBankAccount(currency: TokenType): BankAccount {
     val accountNumber = if (account_number == null || sort_code == null) NoAccountNumber() else UKAccountNumber(sort_code, account_number)
     return BankAccount(id, description, accountNumber, currency)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class MonzoBalance(val balance: Long, val currency: FiatCurrency)
+data class MonzoBalance(val balance: Long, val currency: TokenType)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MonzoCounterparty(
@@ -115,7 +115,7 @@ data class MonzoTransaction(
         val account_id: String,
         val amount: Long,
         val created: Instant,
-        val currency: FiatCurrency,
+        val currency: TokenType,
         val description: String,
         val id: String,
         val notes: String,
