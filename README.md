@@ -105,7 +105,7 @@ Start the corda nodes and issuer daemon:
 3. Navigate to the node directories `cd build/nodes`.
 4. Run the nodes `./runnodes`.
 5. Wait for all the nodes to start up.
-6. Build the issuer daemon jar with `./gradlew :daemon:jar` the jar will be
+6. Build the issuer daemon jar with `./gradlew :daemon:shadowJar` the jar will be
    output to `daemon/build/libs/daemon-0.1.jar`
 7. Start the issuer daemon (See "Starting the issuer daemon" below).
 8. Start the issuer `service-ui` via IntelliJ. Run via the Green Arrow next to the
