@@ -92,17 +92,17 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 shadowJar {
-    baseName = 'daemon'
+    baseName = 'issuer-daemon'
     classifier = '0.1'
     version = null
     zip64 true
 }
 
-mainClassName  = 'com.r3.corda.finance.cash.issuer.daemon.MainKt'
+mainClassName  = 'com.allianz.t2i.issuer.daemon.MainKt'
 
 jar {
     manifest {
-        attributes 'Main-Class': 'com.r3.corda.finance.cash.issuer.daemon.MainKt'
+        attributes 'Main-Class': 'com.allianz.t2i.issuer.daemon.MainKt'
     }
     baseName = project.name
     from {

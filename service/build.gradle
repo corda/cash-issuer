@@ -4,9 +4,9 @@ apply plugin: 'net.corda.plugins.cordapp'
 cordapp {
     targetPlatformVersion 4
     minimumPlatformVersion 4
-    contract {
-        name "Template Contract"
-        vendor "Corda Open Source"
+    workflow {
+        name "T2i Issuer"
+        vendor "Allianz"
         licence "A liberal, open source licence"
         versionId 1
     }
@@ -22,6 +22,9 @@ sourceSets {
         }
     }
 }
+
+archivesBaseName = "t2i-issuer"
+
 
 dependencies {
     // Kotlin.

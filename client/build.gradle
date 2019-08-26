@@ -3,9 +3,9 @@ apply plugin: 'kotlin'
 cordapp {
     targetPlatformVersion 4
     minimumPlatformVersion 4
-    contract {
-        name "Template Contract"
-        vendor "Corda Open Source"
+    workflow {
+        name "T2i Client Workflows"
+        vendor "Allianz"
         licence "A liberal, open source licence"
         versionId 1
     }
@@ -14,6 +14,9 @@ cordapp {
     }
 }
 
+
+
+
 sourceSets {
     main {
         resources {
@@ -21,6 +24,10 @@ sourceSets {
         }
     }
 }
+
+
+archivesBaseName = "t2i-client-workflows"
+
 
 dependencies {
     // Kotlin.

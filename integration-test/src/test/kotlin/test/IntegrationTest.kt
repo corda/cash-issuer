@@ -1,18 +1,18 @@
 package test
 
-import com.r3.corda.finance.cash.issuer.client.flows.RedeemCashShell
-import com.r3.corda.finance.cash.issuer.service.flows.AddNostroTransactions
+import com.allianz.t2i.client.workflows.flows.RedeemCashShell
+import com.allianz.t2i.issuer.workflows.flows.AddNostroTransactions
 import com.r3.corda.lib.tokens.contracts.states.FungibleToken
-import com.r3.corda.lib.tokens.money.GBP
-import com.r3.corda.sdk.issuer.common.contracts.states.BankAccountState
-import com.r3.corda.sdk.issuer.common.contracts.states.NodeTransactionState
-import com.r3.corda.sdk.issuer.common.contracts.states.NostroTransactionState
-import com.r3.corda.sdk.issuer.common.contracts.types.BankAccount
-import com.r3.corda.sdk.issuer.common.contracts.types.BankAccountType
-import com.r3.corda.sdk.issuer.common.contracts.types.NostroTransaction
-import com.r3.corda.sdk.issuer.common.contracts.types.UKAccountNumber
-import com.r3.corda.sdk.issuer.common.workflows.flows.AddBankAccount
-import com.r3.corda.sdk.issuer.common.workflows.flows.MoveCashShell
+import com.r3.corda.lib.tokens.money.EUR
+import com.allianz.t2i.common.contracts.states.BankAccountState
+import com.allianz.t2i.common.contracts.states.NodeTransactionState
+import com.allianz.t2i.common.contracts.states.NostroTransactionState
+import com.allianz.t2i.common.contracts.types.BankAccount
+import com.allianz.t2i.common.contracts.types.BankAccountType
+import com.allianz.t2i.common.contracts.types.NostroTransaction
+import com.allianz.t2i.common.contracts.types.UKAccountNumber
+import com.allianz.t2i.common.workflows.flows.AddBankAccount
+import com.allianz.t2i.common.workflows.flows.MoveCashShell
 import net.corda.core.contracts.ContractState
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startFlow
@@ -49,12 +49,12 @@ class IntegrationTest {
 
     private val issuer = NodeParameters(
             providedName = CordaX500Name("Issuer", "London", "GB"),
-            additionalCordapps = listOf(TestCordapp.findCordapp("com.r3.corda.finance.cash.issuer.service"))
+            additionalCordapps = listOf(TestCordapp.findCordapp("com.allianz.t2i.issuer.workflows"))
     )
 
     private val defaultCorDapps = listOf(
-            TestCordapp.findCordapp("com.r3.corda.sdk.issuer.common.contracts"),
-            TestCordapp.findCordapp("com.r3.corda.sdk.issuer.common.workflows"),
+            TestCordapp.findCordapp("com.allianz.corda.sdk.issuer.common.contracts"),
+            TestCordapp.findCordapp("com.allianz.corda.sdk.issuer.common.workflows"),
             TestCordapp.findCordapp("com.r3.corda.lib.tokens.workflows"),
             TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
             TestCordapp.findCordapp("com.r3.corda.lib.tokens.money")
@@ -80,7 +80,7 @@ class IntegrationTest {
                     accountId = "1",
                     accountName = "Issuer Collateral Account",
                     accountNumber = UKAccountNumber(sortCode = "224466", accountNumber = "11228899"),
-                    currency = GBP,
+                    currency = EUR,
                     type = BankAccountType.COLLATERAL
             )
 
@@ -88,7 +88,7 @@ class IntegrationTest {
                     accountId = "2",
                     accountName = "Party A Bank Account",
                     accountNumber = UKAccountNumber(sortCode = "112233", accountNumber = "44557788"),
-                    currency = GBP,
+                    currency = EUR,
                     type = BankAccountType.COLLATERAL
             )
 
@@ -96,7 +96,7 @@ class IntegrationTest {
                     accountId = "3",
                     accountName = "Party B Bank Account",
                     accountNumber = UKAccountNumber(sortCode = "996633", accountNumber = "11663300"),
-                    currency = GBP,
+                    currency = EUR,
                     type = BankAccountType.COLLATERAL
             )
 
@@ -104,7 +104,7 @@ class IntegrationTest {
                     transactionId = "1",
                     accountId = "1",
                     amount = 1000L,
-                    currency = GBP,
+                    currency = EUR,
                     type = "",
                     description = "",
                     createdAt = Instant.now(),
@@ -117,7 +117,7 @@ class IntegrationTest {
                         transactionId = "2",
                         accountId = "1",
                         amount = -200L,
-                        currency = GBP,
+                        currency = EUR,
                         type = "",
                         description = secretCode,
                         createdAt = Instant.now(),
@@ -196,7 +196,7 @@ class IntegrationTest {
             // ----------------------
 
             println("Cash payment.")
-            val moveCashFlow = A.rpc.startFlowDynamic(MoveCashShell::class.java, bParty, 500L, "GBP").returnValue.toCompletableFuture()
+            val moveCashFlow = A.rpc.startFlowDynamic(MoveCashShell::class.java, bParty, 500L, "EUR").returnValue.toCompletableFuture()
             val newTokenMoveA = A.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             val newTokenMoveB = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             CompletableFuture.allOf(moveCashFlow, newTokenMoveA, newTokenMoveB)
@@ -220,7 +220,7 @@ class IntegrationTest {
             // Stage 6 - Redeem tokens with change.
             // ------------------------------------
 
-            val redeemTx = B.rpc.startFlowDynamic(RedeemCashShell::class.java, 200L, "GBP", issuerParty).returnValue.toCompletableFuture()
+            val redeemTx = B.rpc.startFlowDynamic(RedeemCashShell::class.java, 200L, "EUR", issuerParty).returnValue.toCompletableFuture()
             val partyBchange = B.rpc.vaultTrack(FungibleToken::class.java).updates.toFuture().toCompletableFuture()
             CompletableFuture.allOf(redeemTx, partyBchange)
             println("Party B change:")

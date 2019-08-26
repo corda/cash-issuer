@@ -5,4 +5,4 @@ include 'service-ui'
 include 'common:contracts'
 include 'common:workflows'
 include 'integration-test'
-
+include 'spring-boot-client'

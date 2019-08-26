@@ -64,6 +64,8 @@ allprojects {
         // JAR signing will fail if there are multiple files with the same name.
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
+
+
 }
 
 apply plugin: 'kotlin'
@@ -94,12 +96,13 @@ dependencies {
     cordapp project(":daemon")
     cordapp project(":client")
     cordapp project(":service")
+    cordapp project(":spring-boot-client")
     cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
 }
 
-task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
+task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar','daemon:shadowJar']) {
     directory "./build/nodes"
     nodeDefaults {
         projectCordapp {

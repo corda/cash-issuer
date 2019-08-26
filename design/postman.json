@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "9a5d93e1-94f2-46d3-819b-435861ad0f9e",
+		"name": "AGSN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:10055/connectrpc?host=localhost&port=10009",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:10055/connectrpc?host=localhost&port=10012",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"connectrpc"
+					],
+					"query": [
+						{
+							"key": "host",
+							"value": "localhost"
+						},
+						{
+							"key": "port",
+							"value": "10012"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch Node Information",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/nodeinfo?node=PartyA",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"nodeinfo"
+					],
+					"query": [
+						{
+							"key": "node",
+							"value": "PartyA",
+							"description": "Provide the well known identity of a party to resolve the node to establish RPC connection with"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10055/status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10055/issuer/customendpoint",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/issuer/customendpoint",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"issuer",
+						"customendpoint"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Bank Account",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/t2i/addbankaccount?node=PartyA&accountId=11111&accountName=AGCSSE&accountNumber=13371337&sortCode=442200",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"t2i",
+						"addbankaccount"
+					],
+					"query": [
+						{
+							"key": "node",
+							"value": "PartyA",
+							"description": "Provide the well known identity of a party to resolve the node to establish RPC connection with"
+						},
+						{
+							"key": "accountId",
+							"value": "11111",
+							"description": "Provide the account id  which is recorded in the bank acccount state"
+						},
+						{
+							"key": "accountName",
+							"value": "AGCSSE",
+							"description": "Provide the account name for representing in the bank account state"
+						},
+						{
+							"key": "accountNumber",
+							"value": "13371337",
+							"description": "Provide the account number for the Bank API to poll. Use predefined ones if running in mock mode."
+						},
+						{
+							"key": "sortCode",
+							"value": "442200",
+							"description": "Provide the sort code for the Bank API to poll. Use the predefined one if running in mock mode"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Token Transfer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/t2i/tokentransfer?node=PartyA&recipient=PartyB&amount=4000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"t2i",
+						"tokentransfer"
+					],
+					"query": [
+						{
+							"key": "node",
+							"value": "PartyA",
+							"description": "Provide the well known identity of a party to resolve the node to establish RPC connection with"
+						},
+						{
+							"key": "recipient",
+							"value": "PartyB",
+							"description": "Provide the well known identity of the recipient party  for resolving the node to whom the token is to be transferred"
+						},
+						{
+							"key": "amount",
+							"value": "4000",
+							"description": "Provide the amount in tokens to be transferred."
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch Token Balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/t2i/tokenbalance?node=PartyA",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"t2i",
+						"tokenbalance"
+					],
+					"query": [
+						{
+							"key": "node",
+							"value": "PartyA",
+							"description": "Provide the well known identity of a party to resolve the node to establish RPC connection with"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Token Redemption",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:10055/t2i/tokenredeem?node=PartyA&amount=10000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "10055",
+					"path": [
+						"t2i",
+						"tokenredeem"
+					],
+					"query": [
+						{
+							"key": "node",
+							"value": "PartyA",
+							"description": "Provide the well known identity of a party to resolve the node to establish RPC connection with"
+						},
+						{
+							"key": "amount",
+							"value": "10000",
+							"description": "Provide the amount in tokens to be redeemed."
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
