@@ -116,7 +116,7 @@ Start the corda nodes and issuer daemon:
 At this point all the required processes are up and running. Next, you can
 perform a demo run of an issuance:
 
-1. From `PartyA` add a new bank account via the node shell: `flow start AddBankAccount bankAccount: { accountId: 12345, accountName: Rogers Account, accountNumber: { sortCode: XXXXXX, accountNumber: XXXXXXXX, type: uk }, currency: GBP }, verifier: Issuer`
+1. From `PartyA` add a new bank account via the node shell: `flow start AddBankAccount bankAccount: { accountId: 12345, accountName: Rogers Account, accountNumber: { sortCode: XXXXXX, accountNumber: XXXXXXXX, type: uk }, currency: { tokenIdentifier: GBP} }, verifier: Issuer`
    replacing `XXXXXX` and `YYYYYYYY` with your sort code and account number.
    This is the bank account that you will make a payment from, to the issuer's
    account.
