@@ -93,7 +93,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 
 shadowJar {
     baseName = 'daemon'
-    classifier = 'fat'
+    classifier = '0.1'
     version = null
     zip64 true
 }
