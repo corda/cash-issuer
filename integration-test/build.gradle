@@ -1,4 +1,13 @@
 buildscript{
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://kotlin.bintray.com/kotlinx' }
+        maven { url "$artifactory_contextUrl/corda" }
+        maven { url "$artifactory_contextUrl/list/corda-dev/" }
+    }
+
     dependencies{
         classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
     }

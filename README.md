@@ -119,26 +119,22 @@ perform a demo run of an issuance:
 1. From `PartyA` add a new bank account via the node shell: `flow start AddBankAccount bankAccount: { accountId: 12345, accountName: Rogers Account, accountNumber: { sortCode: XXXXXX, accountNumber: XXXXXXXX, type: uk }, currency: { tokenIdentifier: GBP} }, verifier: Issuer`
    replacing `XXXXXX` and `YYYYYYYY` with your sort code and account number.
    This is the bank account that you will make a payment from, to the issuer's
-   account.
-2. Next, we need to send the bank account you have just added, to the
-   issuer node. First, we need to know the linear ID of the bank account
-   state which has just been added: `run vaultQuery contractStateType: com.r3.corda.finance.cash.issuer.common.states.BankAccountState`.
-   You should see the linear ID in the data structure which is output to the shell.
-   Send the account to the issuer with `start Send issuer: Issuer, linearId: LINEAR_ID`.
-3. You should see the issuer's UI update with new bank account information.
+   account.  *NB* If you are using the mock-mode for the daemon process, make sure that your account information matches
+   one of the accounts from above from the MockMonzo accounts.
+2. You should see the issuer's UI update with new bank account information.
     Note: the issuer's account should already be added.
-4. From the issuer daemon shell type `start`. The daemon should start
+3. From the issuer daemon shell type `start`. The daemon should start
     polling for new transactions.
-5. Make a payment (for a small amount!!) from `PartyA`s bank account to
+4. Make a payment (for a small amount!!) from `PartyA`s bank account to
     the `Issuer`s bank account. Soon after the payment has been made, the
     daemon should pick up the transaction information and the Issuer UI
     should update in the "nostro transactions" pane and the "node transactions"
-    pane.
-6. Assuming the correct details for the bank account used by PartyA were
+    pane.  
+5. Assuming the correct details for the bank account used by PartyA were
     added and successfully sent to the issuer, then the issuance record in
     the node transaction tab should be marked as complete.
-7. Run `run vaultQuery contractStateType: net.corda.finance.contracts.asset.Cash$State`
-    from PartyA to inspect the amount of cash issued. It should be for
+6. Run `run vaultQuery contractStateType: com.r3.corda.lib.tokens.contracts.states.FungibleToken`
+    from PartyA to inspect the amount of cash tokens issued. It should be for
     the same amount of the payment sent to the issuer's account.
     
 Next things to do are to transfer the cash from A to B, then send the cash from B 

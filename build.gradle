@@ -1,9 +1,9 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
-    ext.corda_release_version = '4.1'
+    ext.corda_release_version = '4.3-RC03'
     ext.tokens_release_group = 'com.r3.corda.lib.tokens'
-    ext.tokens_release_version = '1.0'
-    ext.corda_gradle_plugins_version = '4.0.42'
+    ext.tokens_release_version = '1.1-RC01'
+    ext.corda_gradle_plugins_version = '4.0.45'
     ext.kotlin_version = '1.2.71'
     ext.junit_version = '4.12'
     ext.quasar_version = '0.7.10'
@@ -13,14 +13,16 @@ buildscript {
     ext.jopt_simple_version = '5.0.2'
     ext.slf4j_version = '1.7.25'
     ext.log4j_version = '2.11.1'
-    ext.artifactory_contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
+    ext.artifactory_contextUrl = 'https://software.r3.com/artifactory'
+    ext.confidential_id_release_group = "com.r3.corda.lib.ci"
+    ext.confidential_id_release_version = "1.0-RC03"
 
     repositories {
         mavenLocal()
         mavenCentral()
         jcenter()
         maven { url 'https://kotlin.bintray.com/kotlinx' }
-        maven { url "$artifactory_contextUrl/corda-releases" }
+        maven { url "$artifactory_contextUrl/corda" }
         maven { url "$artifactory_contextUrl/list/corda-dev/" }
     }
 
@@ -39,11 +41,11 @@ allprojects {
         mavenLocal()
         jcenter()
         mavenCentral()
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda' }
+        maven { url "$artifactory_contextUrl/corda" }
         // Can be removed post-release - used to get nightly snapshot build.
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-dev' }
-        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib" }
-        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev" }
+        maven { url "$artifactory_contextUrl/corda-dev" }
+        maven { url "$artifactory_contextUrl/corda-lib" }
+        maven { url "$artifactory_contextUrl/corda-lib-dev" }
         maven { url 'https://jitpack.io' }
         maven { url 'https://repo.gradle.org/gradle/libs-releases-local/' }
     }
@@ -95,6 +97,8 @@ dependencies {
     cordapp project(":client")
     cordapp project(":service")
     cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
+    cordapp "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
+    cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
 }
@@ -105,7 +109,9 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         projectCordapp {
             deploy = false
         }
+        cordapp "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
         cordapp("$tokens_release_group:tokens-contracts:$tokens_release_version")
+	    cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
         cordapp("$tokens_release_group:tokens-workflows:$tokens_release_version")
         cordapp("$tokens_release_group:tokens-money:$tokens_release_version")
         cordapp project(":common:contracts")
