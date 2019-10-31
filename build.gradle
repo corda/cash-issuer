@@ -14,6 +14,8 @@ buildscript {
     ext.slf4j_version = '1.7.25'
     ext.log4j_version = '2.11.1'
     ext.artifactory_contextUrl = 'https://software.r3.com/artifactory'
+    ext.confidential_id_release_group = "com.r3.corda.lib.ci"
+    ext.confidential_id_release_version = "1.0-RC03"
 
     repositories {
         mavenLocal()
@@ -95,6 +97,7 @@ dependencies {
     cordapp project(":client")
     cordapp project(":service")
     cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
+    cordapp "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
     cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
     cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
@@ -106,8 +109,9 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         projectCordapp {
             deploy = false
         }
+        cordapp "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
         cordapp("$tokens_release_group:tokens-contracts:$tokens_release_version")
-	cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
+	    cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
         cordapp("$tokens_release_group:tokens-workflows:$tokens_release_version")
         cordapp("$tokens_release_group:tokens-money:$tokens_release_version")
         cordapp project(":common:contracts")
